@@ -7,29 +7,54 @@ import type { AuthSession } from '@majara/types';
 import { api, setToken } from '@/lib/api';
 import { getBotUsernames, getBaleWebApp } from '@/lib/channel';
 
+function isBaleMiniApp() {
+  if (typeof window === 'undefined') return false;
+  const hash = window.location.hash ?? '';
+  if (hash.includes('tgWebAppData') || hash.includes('WebAppData')) return true;
+  const webApp = getBaleWebApp();
+  return Boolean(webApp?.initData);
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const bots = getBotUsernames();
 
   useEffect(() => {
-    const webApp = getBaleWebApp();
-    const initData = webApp?.initData;
-    if (!initData) {
-      setReady(true);
+    const enter = () => {
+      const webApp = getBaleWebApp();
+      webApp?.ready?.();
+      webApp?.expand?.();
+      router.replace('/magazines');
+      if (!webApp?.initData) return;
+      void api<AuthSession>('/auth/bale', {
+        method: 'POST',
+        body: JSON.stringify({ initData: webApp.initData }),
+      })
+        .then((session) => setToken(session.token))
+        .catch(() => undefined);
+    };
+
+    if (isBaleMiniApp()) {
+      enter();
       return;
     }
-    webApp?.ready?.();
-    webApp?.expand?.();
-    api<AuthSession>('/auth/bale', {
-      method: 'POST',
-      body: JSON.stringify({ initData }),
-    })
-      .then((session) => {
-        setToken(session.token);
-        router.replace('/magazines');
-      })
-      .catch(() => setReady(true));
+
+    let tries = 0;
+    const id = window.setInterval(() => {
+      tries += 1;
+      if (isBaleMiniApp()) {
+        window.clearInterval(id);
+        enter();
+        return;
+      }
+      if (tries > 30) {
+        window.clearInterval(id);
+        setReady(true);
+      }
+    }, 50);
+
+    return () => window.clearInterval(id);
   }, [router]);
 
   if (!ready) {

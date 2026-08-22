@@ -9,12 +9,35 @@ import { getBotUsernames } from '@/lib/channel';
 
 type TelegramWebApp = {
   initData?: string;
+  initDataUnsafe?: { user?: unknown };
   ready?: () => void;
   expand?: () => void;
 };
 
 function readTelegramWebApp() {
   return (window as Window & { Telegram?: { WebApp?: TelegramWebApp } }).Telegram?.WebApp;
+}
+
+/** Mini App injects tgWebAppData in the hash even before the SDK script finishes. */
+function isTelegramMiniApp() {
+  if (typeof window === 'undefined') return false;
+  const hash = window.location.hash ?? '';
+  if (hash.includes('tgWebAppData') || hash.includes('tgWebAppVersion')) return true;
+  const webApp = readTelegramWebApp();
+  return Boolean(webApp?.initData || webApp?.initDataUnsafe?.user);
+}
+
+function enterApp(router: ReturnType<typeof useRouter>, webApp?: TelegramWebApp) {
+  webApp?.ready?.();
+  webApp?.expand?.();
+  router.replace('/magazines');
+  if (!webApp?.initData) return;
+  void api<AuthSession>('/auth/telegram', {
+    method: 'POST',
+    body: JSON.stringify({ initData: webApp.initData }),
+  })
+    .then((session) => setToken(session.token))
+    .catch(() => undefined);
 }
 
 export default function HomePage() {
@@ -26,42 +49,28 @@ export default function HomePage() {
     let cancelled = false;
     let tries = 0;
 
-    const finishLanding = () => {
-      if (!cancelled) setReady(true);
+    const goMiniApp = () => {
+      if (cancelled) return;
+      enterApp(router, readTelegramWebApp());
     };
 
-    const login = (webApp: TelegramWebApp) => {
-      webApp.ready?.();
-      webApp.expand?.();
-      api<AuthSession>('/auth/telegram', {
-        method: 'POST',
-        body: JSON.stringify({ initData: webApp.initData }),
-      })
-        .then((session) => {
-          setToken(session.token);
-          router.replace('/magazines');
-        })
-        .catch(finishLanding);
-    };
-
-    const tick = () => {
-      const webApp = readTelegramWebApp();
-      if (webApp?.initData) {
-        login(webApp);
-        return true;
-      }
-      return false;
-    };
-
-    if (tick()) return () => {
-      cancelled = true;
-    };
+    if (isTelegramMiniApp()) {
+      goMiniApp();
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const id = window.setInterval(() => {
       tries += 1;
-      if (tick() || tries > 20) {
+      if (isTelegramMiniApp()) {
         window.clearInterval(id);
-        if (!readTelegramWebApp()?.initData) finishLanding();
+        goMiniApp();
+        return;
+      }
+      if (tries > 30) {
+        window.clearInterval(id);
+        if (!cancelled) setReady(true);
       }
     }, 50);
 

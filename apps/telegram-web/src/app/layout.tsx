@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { Lalezar, Vazirmatn } from 'next/font/google';
 import { SentryInit } from '@/lib/sentry';
-import { TelegramSdk } from '@/components/telegram-sdk';
 import './globals.css';
 
 const vazirmatn = Vazirmatn({
@@ -38,8 +38,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         }}
       >
         <div className="majara-grain" />
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
         <SentryInit />
-        <TelegramSdk />
         {children}
       </body>
     </html>
