@@ -2,11 +2,33 @@ export function MagazineCover({
   title = 'میراث از دست رفته',
   issue = 3,
   season = 'زمستان ۱۴۰۳',
+  imageSrc,
 }: {
   title?: string;
   issue?: number;
   season?: string;
+  imageSrc?: string;
 }) {
+  if (imageSrc) {
+    return (
+      <div
+        style={{
+          position: 'relative',
+          aspectRatio: '3 / 4.2',
+          overflow: 'hidden',
+          background: '#111',
+          boxShadow: '0 18px 40px rgba(0,0,0,.28)',
+        }}
+      >
+        <img
+          src={imageSrc}
+          alt={`${title} — شماره ${issue}`}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -27,10 +49,7 @@ export function MagazineCover({
             'linear-gradient(180deg, rgba(0,0,0,.15), transparent 30%, rgba(0,0,0,.55) 100%)',
         }}
       />
-      <div
-        className="majara-scratch"
-        style={{ position: 'absolute', inset: 0, opacity: 0.22 }}
-      />
+      <div className="majara-scratch" style={{ position: 'absolute', inset: 0, opacity: 0.22 }} />
       <div
         style={{
           position: 'absolute',

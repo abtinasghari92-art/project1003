@@ -197,7 +197,7 @@ export class AuthService {
   }
 
   private async issueSession(userId: string) {
-    const token = await this.jwt.signAsync({ sub: userId });
+    const token = await this.jwt.signAsync({ sub: userId, role: 'user' });
     const user = await this.getMe(userId);
     return { token, user };
   }

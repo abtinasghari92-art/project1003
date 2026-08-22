@@ -1,0 +1,8 @@
+{
+  "platform": "liara",
+  "app": "majara-admin",
+  "port": 3002,
+  "next": {
+    "output": "standalone"
+  }
+}

@@ -11,6 +11,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { StorageModule } from './storage/storage.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { BaleModule } from './bale/bale.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BaleModule } from './bale/bale.module';
     StorageModule,
     TelegramModule,
     BaleModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

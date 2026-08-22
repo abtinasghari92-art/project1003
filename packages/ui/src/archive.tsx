@@ -2,8 +2,13 @@
 
 import { MagazineCover } from './cover';
 
-const ISSUES = [
-  { number: 3, title: 'میراث از دست رفته', season: 'زمستان ۱۴۰۳' },
+const ISSUES: { number: number; title: string; season: string; coverSrc?: string }[] = [
+  {
+    number: 3,
+    title: 'میراث از دست رفته',
+    season: 'زمستان ۱۴۰۳',
+    coverSrc: '/issues/3/cover-card.jpg',
+  },
   { number: 2, title: 'عملیات در اروپا', season: 'پاییز ۱۴۰۳' },
   { number: 1, title: 'شماره اول', season: 'تابستان ۱۴۰۳' },
 ];
@@ -31,7 +36,12 @@ export function ArchiveScreen() {
         {ISSUES.map((issue) => (
           <article key={issue.number}>
             <div className="relative">
-              <MagazineCover title={issue.title} issue={issue.number} season={issue.season} />
+              <MagazineCover
+                title={issue.title}
+                issue={issue.number}
+                season={issue.season}
+                imageSrc={issue.coverSrc}
+              />
               <span className="absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-full bg-[var(--majara-red)] text-[11px] font-bold text-white">
                 {issue.number}
               </span>

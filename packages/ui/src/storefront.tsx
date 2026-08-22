@@ -7,6 +7,7 @@ export interface PieceCard {
   id: string;
   title: string;
   summary: string;
+  imageSrc?: string;
 }
 
 export interface ArchiveIssue {
@@ -14,6 +15,7 @@ export interface ArchiveIssue {
   number: number;
   title: string;
   season: string;
+  coverSrc?: string;
 }
 
 export interface StorefrontHomeProps {
@@ -28,28 +30,38 @@ export interface StorefrontHomeProps {
   onFavorite?: () => void;
   viewAllHref?: string;
   archiveHref?: string;
+  latestCoverSrc?: string;
 }
 
 const DEFAULT_PIECES: PieceCard[] = [
   {
     id: '1',
     title: 'عزت بگوویچ گفت همه درها را به روی ما بسته‌اند',
-    summary: 'روایت محاصره و دیپلماسی از زبان فرمانده بوسنی.',
+    summary: 'گفت‌وگو با احسان رجبی، عکاس و مستندساز جنگ.',
+    imageSrc: '/issues/3/page-14.jpg',
   },
   {
     id: '2',
-    title: 'در مستند خنجر و شقایق همه چیز آوینی بود',
-    summary: 'تکه‌ای از حافظه تصویری جنگ و روایت مقاومت.',
+    title: 'لنزهای جنگی',
+    summary: 'فصل اول · رسانه؛ حضور عکاسان ایرانی در جنگ بوسنی.',
+    imageSrc: '/issues/3/page-07.png',
   },
   {
     id: '3',
-    title: 'من از بوسنی می‌آیم، از سرزمین خون و خشونت',
-    summary: 'یادداشت میدان؛ خط مقدم بدون خط مقدم.',
+    title: 'میراث از دست رفته',
+    summary: 'چرا ایران نمی‌تواند از نقش خود در نجات بوسنی بهره‌برداری کند؟',
+    imageSrc: '/issues/3/cover-card.jpg',
   },
 ];
 
 const DEFAULT_ARCHIVE: ArchiveIssue[] = [
-  { id: '3', number: 3, title: 'میراث از دست رفته', season: 'زمستان ۱۴۰۳' },
+  {
+    id: '3',
+    number: 3,
+    title: 'میراث از دست رفته',
+    season: 'زمستان ۱۴۰۳',
+    coverSrc: '/issues/3/cover-card.jpg',
+  },
   { id: '2', number: 2, title: 'عملیات در اروپا', season: 'پاییز ۱۴۰۳' },
   { id: '1', number: 1, title: 'شماره اول', season: 'تابستان ۱۴۰۳' },
 ];
@@ -77,11 +89,12 @@ export function StorefrontHome({
   onFavorite,
   viewAllHref = '/preview',
   archiveHref = '/archive',
+  latestCoverSrc = '/issues/3/cover-card.jpg',
 }: StorefrontHomeProps): ReactNode {
   return (
     <div className="space-y-8 pb-4">
       <section className="grid grid-cols-[0.92fr_1.08fr] items-start gap-3">
-        <MagazineCover title={latestTitle} issue={latestIssue} />
+        <MagazineCover title={latestTitle} issue={latestIssue} imageSrc={latestCoverSrc} />
         <div className="pt-1">
           <p className="mb-1 text-[11px] font-bold tracking-wide text-[var(--majara-red)]">
             جدیدترین شماره
@@ -125,7 +138,11 @@ export function StorefrontHome({
               key={piece.id}
               className="min-w-[78%] overflow-hidden border border-[var(--majara-line)] bg-white shadow-[0_8px_24px_rgba(20,6,9,.06)]"
             >
-              <div className="h-28 bg-[linear-gradient(135deg,#1c1814,#3a332c_50%,#e20613)]" />
+              {piece.imageSrc ? (
+                <img src={piece.imageSrc} alt="" className="h-28 w-full object-cover object-top" />
+              ) : (
+                <div className="h-28 bg-[linear-gradient(135deg,#1c1814,#3a332c_50%,#e20613)]" />
+              )}
               <div className="space-y-2 p-3">
                 <h3 className="text-[13px] font-bold leading-6">{piece.title}</h3>
                 <p className="text-[11px] leading-5 text-[var(--majara-muted)]">{piece.summary}</p>
@@ -148,7 +165,12 @@ export function StorefrontHome({
           {archive.map((issue) => (
             <a key={issue.id} href={archiveHref} className="min-w-[108px]">
               <div className="relative">
-                <MagazineCover title={issue.title} issue={issue.number} season={issue.season} />
+                <MagazineCover
+                  title={issue.title}
+                  issue={issue.number}
+                  season={issue.season}
+                  imageSrc={issue.coverSrc}
+                />
                 <span className="absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-full bg-[var(--majara-red)] text-[11px] font-bold text-white">
                   {issue.number}
                 </span>

@@ -1,3 +1,4 @@
+import { hash } from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -22,7 +23,22 @@ async function main() {
     },
   });
 
-  // eslint-disable-next-line no-console
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+  if (email && password) {
+    const passwordHash = await hash(password, 10);
+    await prisma.adminUser.upsert({
+      where: { email: email.toLowerCase() },
+      update: { passwordHash },
+      create: {
+        email: email.toLowerCase(),
+        passwordHash,
+        name: process.env.ADMIN_NAME ?? 'ادمین',
+      },
+    });
+    console.log('Seeded admin', email);
+  }
+
   console.log('Seeded magazine', magazine.slug);
 }
 

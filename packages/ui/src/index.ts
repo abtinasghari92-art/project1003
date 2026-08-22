@@ -4,5 +4,7 @@ export { StorefrontHome } from './storefront';
 export type { StorefrontHomeProps, PieceCard, ArchiveIssue } from './storefront';
 export { ArchiveScreen } from './archive';
 export { PreviewScreen } from './preview';
+export { Masthead, MASTHEAD_ROWS } from './masthead';
+export { AboutMajara, ABOUT_PARAGRAPHS } from './about';
 export { DistressedMark } from './mark';
 export { MagazineCover } from './cover';

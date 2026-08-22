@@ -39,6 +39,7 @@ model User {
   cart          Cart?
   orders        Order[]
   entitlements  Entitlement[]
+  notes         CustomerNote[]
 }
 
 model TelegramIdentity {
@@ -171,4 +172,31 @@ model Entitlement {
   createdAt DateTime @default(now())
 
   @@unique([userId, issueId])
+}
+
+enum AdminRole {
+  ADMIN
+}
+
+model AdminUser {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  role         AdminRole      @default(ADMIN)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  notes        CustomerNote[]
+}
+
+model CustomerNote {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adminId   String
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }

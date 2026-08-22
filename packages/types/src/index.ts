@@ -97,3 +97,21 @@ export interface CreatePaymentIntentRequest {
   orderId: string;
   provider: PaymentProvider;
 }
+
+export interface AdminPublic {
+  id: string;
+  email: string;
+  name: string;
+  role: 'ADMIN';
+}
+
+export interface AdminSession {
+  token: string;
+  admin: AdminPublic;
+}
+
+export interface AdminStats {
+  customers: number;
+  paidOrders: number;
+  pendingPayments: number;
+}

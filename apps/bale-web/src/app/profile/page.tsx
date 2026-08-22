@@ -6,6 +6,7 @@ import { AppShell } from '@/components/shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
+import { AboutMajara, Masthead } from '@majara/ui';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<PublicUser | null>(null);
@@ -73,6 +74,10 @@ export default function ProfilePage() {
         </div>
       )}
       {message ? <p className="mt-3 text-sm text-[var(--majara-red)]">{message}</p> : null}
+      <div className="mt-8 space-y-6">
+        <AboutMajara />
+        <Masthead compact />
+      </div>
     </AppShell>
   );
 }

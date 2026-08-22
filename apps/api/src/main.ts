@@ -12,10 +12,16 @@ async function bootstrap() {
   }
 
   const app = await NestFactory.create(AppModule, { rawBody: true });
-  const origins = (process.env.CORS_ORIGINS ?? '')
+  const listed = (process.env.CORS_ORIGINS ?? '')
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
+  const extra = [
+    process.env.ADMIN_WEB_URL,
+    process.env.TELEGRAM_WEB_URL,
+    process.env.BALE_WEB_URL,
+  ].filter((item): item is string => Boolean(item));
+  const origins = [...new Set([...listed, ...extra])];
 
   app.enableCors({
     origin: origins.length ? origins : true,
