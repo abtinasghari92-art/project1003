@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: majara
+      POSTGRES_PASSWORD: majara
+      POSTGRES_DB: majara
+    volumes:
+      - majara_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U majara -d majara"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  majara_pg:

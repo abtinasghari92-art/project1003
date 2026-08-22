@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@import '@majara/ui/theme.css';
+@source "../../../../packages/ui/src";
+
+html {
+  direction: rtl;
+}
+
+body {
+  min-height: 100dvh;
+}
