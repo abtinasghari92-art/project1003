@@ -19,15 +19,23 @@ export interface AuthSession {
 export interface PublicUser {
   id: string;
   phone: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  province: string | null;
+  city: string | null;
+  street: string | null;
+  postalCode: string | null;
   telegram?: {
     telegramId: string;
     username: string | null;
     firstName: string | null;
+    lastName: string | null;
   };
   bale?: {
     baleId: string;
     username: string | null;
     firstName: string | null;
+    lastName: string | null;
   };
 }
 
@@ -52,14 +60,28 @@ export interface CartDto {
   id: string;
   items: CartItemDto[];
   totalRial: number;
+  shippingRial: number;
+  grandTotalRial: number;
 }
 
 export interface CartItemDto {
   id: string;
   issueId: string;
   title: string;
+  number: number;
   priceRial: number;
   qty: number;
+}
+
+export interface CheckoutAddress {
+  firstName: string;
+  lastName: string;
+  province: string;
+  city: string;
+  street: string;
+  postalCode: string;
+  phone: string;
+  notes?: string;
 }
 
 export interface OrderDto {
@@ -67,6 +89,23 @@ export interface OrderDto {
   status: OrderStatus;
   amountRial: number;
   amountUsd: string | null;
+  shippingRial: number;
+  items: OrderItemDto[];
+  firstName: string | null;
+  lastName: string | null;
+  province: string | null;
+  city: string | null;
+  street: string | null;
+  postalCode: string | null;
+  phone: string | null;
+  notes: string | null;
+}
+
+export interface OrderItemDto {
+  id: string;
+  title: string;
+  priceRial: number;
+  qty: number;
 }
 
 export interface PaymentIntentDto {

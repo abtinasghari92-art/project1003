@@ -1,5 +1,6 @@
 {
-  "platform": "liara",
-  "app": "majara-api",
-  "port": 4000
+  "platform": "docker",
+  "app": "majaramag",
+  "port": 4000,
+  "dockerfile": "Dockerfile.api"
 }

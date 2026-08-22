@@ -21,7 +21,7 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard)
   @Post('intent')
   intent(@CurrentUser() user: AuthUser, @Body() dto: CreatePaymentIntentDto) {
-    return this.payments.createIntent(user.id, dto.orderId, dto.provider);
+    return this.payments.createIntent(user.id, dto.orderId, dto.provider, user.channel);
   }
 
   @Get('zibal/callback')

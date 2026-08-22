@@ -19,30 +19,42 @@ export class PaymentsService {
     private readonly nowpayments: NowpaymentsProvider,
   ) {}
 
-  async createIntent(userId: string, orderId: string, provider: PaymentProvider) {
+  async createIntent(
+    userId: string,
+    orderId: string,
+    provider: PaymentProvider,
+    channel?: 'TELEGRAM' | 'BALE',
+  ) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { user: true },
+      include: { user: { include: { telegram: true, bale: true } } },
     });
     if (!order || order.userId !== userId) throw new NotFoundException('سفارش پیدا نشد');
     if (order.status === 'PAID') throw new BadRequestException('این سفارش قبلاً پرداخت شده');
 
+    if (provider === 'NOWPAYMENTS' && this.isBaleSession(channel, order.user)) {
+      throw new ForbiddenException('پرداخت کریپتو در پیام‌رسان بله فعال نیست');
+    }
+
     if (provider === 'ZIBAL' && !order.user.phone) {
       throw new ForbiddenException('برای پرداخت ریالی ابتدا شماره موبایل را تایید کنید');
     }
+
+    const appChannel = this.isBaleSession(channel, order.user) ? 'BALE' : 'TELEGRAM';
 
     const payment = await this.prisma.payment.create({
       data: {
         orderId: order.id,
         provider,
         amountRial: order.amountRial,
+        channel: appChannel,
       },
     });
 
     if (provider === 'ZIBAL') {
       return this.startZibal(payment.id, order.id, order.amountRial);
     }
-    return this.startNowpayments(payment.id, order);
+    return this.startNowpayments(payment.id, order, appChannel);
   }
 
   async zibalCallback(trackId: string, success: string | undefined) {
@@ -52,7 +64,7 @@ export class PaymentsService {
     });
     if (!payment) throw new NotFoundException('تراکنش زیبال پیدا نشد');
 
-    const appUrl = this.returnUrl();
+    const appUrl = this.appUrl(payment.channel);
     if (success === '0') {
       await this.prisma.payment.update({
         where: { id: payment.id },
@@ -147,9 +159,10 @@ export class PaymentsService {
   private async startNowpayments(
     paymentId: string,
     order: { id: string; amountUsd: unknown },
+    channel: 'TELEGRAM' | 'BALE',
   ) {
     const priceUsd = Number(order.amountUsd ?? 1);
-    const appUrl = this.returnUrl();
+    const appUrl = this.appUrl(channel);
     const invoice = await this.nowpayments.createInvoice({
       priceUsd: priceUsd > 0 ? priceUsd : 1,
       orderId: order.id,
@@ -201,7 +214,23 @@ export class PaymentsService {
     });
   }
 
-  private returnUrl() {
+  private isBaleSession(
+    channel: 'TELEGRAM' | 'BALE' | undefined,
+    user: { telegram: unknown; bale: unknown },
+  ) {
+    if (channel === 'BALE') return true;
+    if (channel === 'TELEGRAM') return false;
+    return Boolean(user.bale) && !user.telegram;
+  }
+
+  private appUrl(channel?: string | null) {
+    if (channel === 'BALE') {
+      return (
+        this.config.get('BALE_WEB_URL') ??
+        this.config.get('TELEGRAM_WEB_URL') ??
+        'http://localhost:3001'
+      );
+    }
     return (
       this.config.get('TELEGRAM_WEB_URL') ??
       this.config.get('BALE_WEB_URL') ??

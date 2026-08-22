@@ -1,8 +1,6 @@
 {
-  "platform": "liara",
+  "platform": "docker",
   "app": "majara-admin",
   "port": 3002,
-  "next": {
-    "output": "standalone"
-  }
+  "dockerfile": "Dockerfile.admin"
 }

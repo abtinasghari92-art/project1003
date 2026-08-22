@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -28,10 +29,16 @@ enum OrderStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  phone     String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  phone      String?  @unique
+  firstName  String?
+  lastName   String?
+  province   String?
+  city       String?
+  street     String?
+  postalCode String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   telegram      TelegramIdentity?
   bale          BaleIdentity?
@@ -124,16 +131,25 @@ model CartItem {
 }
 
 model Order {
-  id         String      @id @default(cuid())
-  userId     String
-  user       User        @relation(fields: [userId], references: [id])
-  status     OrderStatus @default(PENDING_PAYMENT)
-  amountRial Int
-  amountUsd  Decimal?    @db.Decimal(12, 2)
-  items      OrderItem[]
-  payments   Payment[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  status       OrderStatus @default(PENDING_PAYMENT)
+  amountRial   Int
+  amountUsd    Decimal?    @db.Decimal(12, 2)
+  shippingRial Int         @default(0)
+  firstName    String?
+  lastName     String?
+  province     String?
+  city         String?
+  street       String?
+  postalCode   String?
+  phone        String?
+  notes        String?
+  items        OrderItem[]
+  payments     Payment[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model OrderItem {
@@ -153,6 +169,7 @@ model Payment {
   order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   provider    PaymentProvider
   status      PaymentStatus   @default(PENDING)
+  channel     String?
   amountRial  Int
   externalId  String?
   redirectUrl String?

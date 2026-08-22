@@ -1,8 +1,6 @@
 {
-  "platform": "liara",
-  "app": "majara-bale-web",
+  "platform": "docker",
+  "app": "majaramag-bale",
   "port": 3001,
-  "next": {
-    "output": "standalone"
-  }
+  "dockerfile": "Dockerfile.bale-web"
 }

@@ -1,0 +1,18 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "firstName" TEXT;
+ALTER TABLE "User" ADD COLUMN "lastName" TEXT;
+ALTER TABLE "User" ADD COLUMN "province" TEXT;
+ALTER TABLE "User" ADD COLUMN "city" TEXT;
+ALTER TABLE "User" ADD COLUMN "street" TEXT;
+ALTER TABLE "User" ADD COLUMN "postalCode" TEXT;
+
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN "shippingRial" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "Order" ADD COLUMN "firstName" TEXT;
+ALTER TABLE "Order" ADD COLUMN "lastName" TEXT;
+ALTER TABLE "Order" ADD COLUMN "province" TEXT;
+ALTER TABLE "Order" ADD COLUMN "city" TEXT;
+ALTER TABLE "Order" ADD COLUMN "street" TEXT;
+ALTER TABLE "Order" ADD COLUMN "postalCode" TEXT;
+ALTER TABLE "Order" ADD COLUMN "phone" TEXT;
+ALTER TABLE "Order" ADD COLUMN "notes" TEXT;

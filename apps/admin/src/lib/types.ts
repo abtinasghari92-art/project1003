@@ -41,6 +41,15 @@ export type OrderRow = {
   id: string;
   status: string;
   amountRial: number;
+  shippingRial?: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  province?: string | null;
+  city?: string | null;
+  street?: string | null;
+  postalCode?: string | null;
+  phone?: string | null;
+  notes?: string | null;
   createdAt: string;
   user?: CustomerRow | { id: string; phone: string | null; telegram: Identity | null; bale: Identity | null };
   items?: OrderItemRow[];

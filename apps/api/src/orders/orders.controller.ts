@@ -1,5 +1,6 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { OrdersService } from './orders.service';
+import { CheckoutDto } from './orders.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, type AuthUser } from '../common/decorators/current-user.decorator';
 
@@ -14,7 +15,7 @@ export class OrdersController {
   }
 
   @Post()
-  checkout(@CurrentUser() user: AuthUser) {
-    return this.orders.checkout(user.id);
+  checkout(@CurrentUser() user: AuthUser, @Body() dto: CheckoutDto) {
+    return this.orders.checkout(user.id, dto);
   }
 }

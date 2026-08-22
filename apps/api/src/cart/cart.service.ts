@@ -1,9 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { resolveShippingRial } from '@majara/utils';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CartService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
 
   async getOrCreate(userId: string) {
     return this.prisma.cart.upsert({
@@ -32,18 +37,27 @@ export class CartService {
     return this.getOrCreate(userId);
   }
 
+  shippingRial() {
+    return resolveShippingRial(this.config.get('SHIPPING_RIAL'));
+  }
+
   toDto(cart: Awaited<ReturnType<CartService['getOrCreate']>>) {
     const items = cart.items.map((item) => ({
       id: item.id,
       issueId: item.issueId,
       title: item.issue.title,
+      number: item.issue.number,
       priceRial: item.issue.priceRial,
       qty: item.qty,
     }));
+    const totalRial = items.reduce((sum, item) => sum + item.priceRial * item.qty, 0);
+    const shippingRial = this.shippingRial();
     return {
       id: cart.id,
       items,
-      totalRial: items.reduce((sum, item) => sum + item.priceRial * item.qty, 0),
+      totalRial,
+      shippingRial,
+      grandTotalRial: totalRial + shippingRial,
     };
   }
 }

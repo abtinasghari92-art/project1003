@@ -93,3 +93,28 @@ export function rialToUsd(amountRial: number, usdToIrrRate: number): number {
 export function formatRial(amountRial: number): string {
   return new Intl.NumberFormat('fa-IR').format(amountRial);
 }
+
+/** Packaging and postage on the original majara.sooremehr.ir checkout. */
+export const DEFAULT_SHIPPING_RIAL = 70_000;
+
+export function toEnglishDigits(input: string): string {
+  return input
+    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - '۰'.charCodeAt(0)))
+    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - '٠'.charCodeAt(0)));
+}
+
+export function isIranPostalCode(value: string): boolean {
+  return /^\d{10}$/.test(toEnglishDigits(value).replace(/\s/g, ''));
+}
+
+export function resolveShippingRial(raw?: string | number | null): number {
+  const amount = Number(raw);
+  return Number.isFinite(amount) && amount >= 0 ? amount : DEFAULT_SHIPPING_RIAL;
+}
+
+export function orderAmountRial(
+  subtotalRial: number,
+  shippingRial = DEFAULT_SHIPPING_RIAL,
+): number {
+  return subtotalRial + shippingRial;
+}

@@ -1,20 +1,80 @@
 'use client';
 
-import { useState } from 'react';
-import type { OrderDto, PaymentIntentDto } from '@majara/types';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type {
+  CartDto,
+  MagazineDto,
+  OrderDto,
+  PaymentIntentDto,
+  PublicUser,
+} from '@majara/types';
+import { CheckoutScreen, type CheckoutSubmitPayload } from '@majara/ui';
 import { AppShell } from '@/components/shell';
-import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const [cart, setCart] = useState<CartDto | null>(null);
+  const [user, setUser] = useState<PublicUser | null>(null);
+  const [fallback, setFallback] = useState<{
+    id: string;
+    title: string;
+    number: number;
+    priceRial: number;
+    qty: number;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function pay(provider: 'ZIBAL' | 'NOWPAYMENTS') {
+  useEffect(() => {
+    void api<CartDto>('/cart').then(setCart).catch(() => setCart(null));
+    void api<PublicUser>('/me').then(setUser).catch(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
+    if (cart?.items.length) return;
+    void api<MagazineDto[]>('/magazines')
+      .then((magazines) => {
+        const issue = magazines[0]?.issues?.[0];
+        if (!issue) return;
+        setFallback({
+          id: issue.id,
+          title: issue.title,
+          number: issue.number,
+          priceRial: issue.priceRial,
+          qty: 1,
+        });
+      })
+      .catch(() => undefined);
+  }, [cart]);
+
+  const items = cart?.items.length ? cart.items : fallback ? [fallback] : [];
+  const shippingRial = cart?.shippingRial ?? 70_000;
+
+  const initialAddress = useMemo(
+    () => ({
+      firstName: user?.firstName ?? user?.telegram?.firstName ?? user?.bale?.firstName ?? '',
+      lastName: user?.lastName ?? user?.telegram?.lastName ?? user?.bale?.lastName ?? '',
+      province: user?.province ?? 'تهران',
+      city: user?.city ?? '',
+      street: user?.street ?? '',
+      postalCode: user?.postalCode ?? '',
+      phone: user?.phone ?? '',
+      notes: '',
+    }),
+    [user],
+  );
+
+  async function onSubmit(payload: CheckoutSubmitPayload) {
     setBusy(true);
     setError(null);
     try {
-      const order = await api<OrderDto>('/orders', { method: 'POST' });
+      const { provider, ...address } = payload;
+      const order = await api<OrderDto>('/orders', {
+        method: 'POST',
+        body: JSON.stringify(address),
+      });
       const intent = await api<PaymentIntentDto>('/payments/intent', {
         method: 'POST',
         body: JSON.stringify({ orderId: order.id, provider }),
@@ -33,19 +93,16 @@ export default function CheckoutPage() {
 
   return (
     <AppShell>
-      <h1 className="mb-4 font-[family-name:var(--font-display)] text-2xl">پرداخت</h1>
-      <p className="mb-6 text-sm text-[var(--majara-muted)]">
-        پرداخت ریالی با زیبال و پرداخت کریپتو با NowPayments.
-      </p>
-      <div className="space-y-3">
-        <Button size="lg" disabled={busy} onClick={() => pay('ZIBAL')}>
-          پرداخت ریالی — زیبال
-        </Button>
-        <Button size="lg" variant="outline" disabled={busy} onClick={() => pay('NOWPAYMENTS')}>
-          پرداخت کریپتو — NowPayments
-        </Button>
-      </div>
-      {error ? <p className="mt-4 text-sm text-[var(--majara-red)]">{error}</p> : null}
+      <CheckoutScreen
+        items={items}
+        shippingRial={shippingRial}
+        initialAddress={initialAddress}
+        busy={busy}
+        error={error}
+        cryptoEnabled={false}
+        onSubmit={onSubmit}
+        onEditOrder={() => router.push('/cart')}
+      />
     </AppShell>
   );
 }

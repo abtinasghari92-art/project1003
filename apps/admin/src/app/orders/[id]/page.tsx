@@ -13,6 +13,15 @@ type OrderDetail = {
   status: string;
   amountRial: number;
   amountUsd: string | null;
+  shippingRial: number;
+  firstName: string | null;
+  lastName: string | null;
+  province: string | null;
+  city: string | null;
+  street: string | null;
+  postalCode: string | null;
+  phone: string | null;
+  notes: string | null;
   createdAt: string;
   user: {
     id: string;
@@ -67,6 +76,27 @@ function OrderDetail({ id }: { id: string }) {
           تلگرام: {data.user.telegram?.username ? `@${data.user.telegram.username}` : '—'} · بله:{' '}
           {data.user.bale?.username ? `@${data.user.bale.username}` : '—'}
         </p>
+      </Card>
+
+      <Card>
+        <h2 className="mb-2 font-bold">صورت حساب و حمل و نقل</h2>
+        {data.firstName || data.street ? (
+          <ul className="space-y-1 text-sm">
+            <li>
+              {[data.firstName, data.lastName].filter(Boolean).join(' ') || '—'}
+            </li>
+            <li>
+              {[data.province, data.city].filter(Boolean).join('، ') || '—'}
+            </li>
+            <li>{data.street || '—'}</li>
+            <li>کدپستی: {data.postalCode || '—'}</li>
+            <li>تلفن: {data.phone || '—'}</li>
+            {data.notes ? <li>یادداشت: {data.notes}</li> : null}
+            <li>بسته‌بندی و ارسال: {formatRial(data.shippingRial ?? 0)}</li>
+          </ul>
+        ) : (
+          <p className="text-sm text-[var(--majara-muted)]">آدرسی ثبت نشده</p>
+        )}
       </Card>
 
       <Card className="overflow-x-auto p-0">

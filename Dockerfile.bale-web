@@ -1,0 +1,29 @@
+FROM node:22-alpine
+WORKDIR /app
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json tsconfig.base.json ./
+COPY apps/bale-web ./apps/bale-web
+COPY packages/types ./packages/types
+COPY packages/ui ./packages/ui
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @majara/types build
+
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_BALE_BOT_USERNAME
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_BALE_BOT_USERNAME=$NEXT_PUBLIC_BALE_BOT_USERNAME
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV DOCKER_BUILD=1
+ENV NODE_ENV=production
+ENV PORT=3001
+ENV HOSTNAME=0.0.0.0
+
+RUN pnpm --filter @majara/bale-web build \
+  && rm -rf /app/apps/bale-web/.next/cache /root/.local/share/pnpm/store
+
+WORKDIR /app/apps/bale-web
+EXPOSE 3001
+CMD ["node", "node_modules/next/dist/bin/next", "start", "-H", "0.0.0.0", "-p", "3001"]

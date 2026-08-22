@@ -5,9 +5,12 @@ import {
   formatRial,
   generateOtpCode,
   hashOtp,
+  isIranPostalCode,
   normalizePhone,
+  orderAmountRial,
   rialToUsd,
   safeEqual,
+  toEnglishDigits,
   verifyNowpaymentsIpn,
 } from './index';
 
@@ -36,6 +39,20 @@ describe('money', () => {
   });
   it('formats rial in fa-IR', () => {
     assert.ok(formatRial(250000).length > 0);
+  });
+  it('adds packaging to the checkout total', () => {
+    assert.equal(orderAmountRial(250_000, 70_000), 320_000);
+  });
+});
+
+describe('iran digits', () => {
+  it('converts persian digits', () => {
+    assert.equal(toEnglishDigits('۰۹۱۲'), '0912');
+  });
+  it('accepts a 10-digit postal code', () => {
+    assert.equal(isIranPostalCode('1234567890'), true);
+    assert.equal(isIranPostalCode('۱۲۳۴۵۶۷۸۹۰'), true);
+    assert.equal(isIranPostalCode('12345'), false);
   });
 });
 

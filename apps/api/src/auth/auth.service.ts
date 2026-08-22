@@ -40,7 +40,7 @@ export class AuthService {
     const parsed = validateTelegramInitData(initData, token);
     const user = this.parseMiniAppUser(parsed.user);
     const record = await this.upsertTelegramUser(user);
-    return this.issueSession(record.id);
+    return this.issueSession(record.id, 'TELEGRAM');
   }
 
   async loginBale(initData: string) {
@@ -49,7 +49,7 @@ export class AuthService {
     const parsed = validateBaleInitData(initData, token);
     const user = this.parseMiniAppUser(parsed.user);
     const record = await this.upsertBaleUser(user);
-    return this.issueSession(record.id);
+    return this.issueSession(record.id, 'BALE');
   }
 
   async sendOtp(userId: string, rawPhone: string) {
@@ -196,8 +196,8 @@ export class AuthService {
     });
   }
 
-  private async issueSession(userId: string) {
-    const token = await this.jwt.signAsync({ sub: userId, role: 'user' });
+  private async issueSession(userId: string, channel: 'TELEGRAM' | 'BALE') {
+    const token = await this.jwt.signAsync({ sub: userId, role: 'user', channel });
     const user = await this.getMe(userId);
     return { token, user };
   }
@@ -216,21 +216,40 @@ export class AuthService {
   private toPublicUser(user: {
     id: string;
     phone: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    province?: string | null;
+    city?: string | null;
+    street?: string | null;
+    postalCode?: string | null;
     telegram?: {
       telegramId: string;
       username: string | null;
       firstName: string | null;
+      lastName: string | null;
     } | null;
-    bale?: { baleId: string; username: string | null; firstName: string | null } | null;
+    bale?: {
+      baleId: string;
+      username: string | null;
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
   }): PublicUser {
     return {
       id: user.id,
       phone: user.phone,
+      firstName: user.firstName ?? null,
+      lastName: user.lastName ?? null,
+      province: user.province ?? null,
+      city: user.city ?? null,
+      street: user.street ?? null,
+      postalCode: user.postalCode ?? null,
       telegram: user.telegram
         ? {
             telegramId: user.telegram.telegramId,
             username: user.telegram.username,
             firstName: user.telegram.firstName,
+            lastName: user.telegram.lastName,
           }
         : undefined,
       bale: user.bale
@@ -238,6 +257,7 @@ export class AuthService {
             baleId: user.bale.baleId,
             username: user.bale.username,
             firstName: user.bale.firstName,
+            lastName: user.bale.lastName,
           }
         : undefined,
     };

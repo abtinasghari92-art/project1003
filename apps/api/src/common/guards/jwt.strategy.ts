@@ -8,6 +8,7 @@ export type JwtRole = 'user' | 'ADMIN';
 export interface JwtPayload {
   sub: string;
   role?: JwtRole;
+  channel?: 'TELEGRAM' | 'BALE';
 }
 
 @Injectable()
@@ -20,6 +21,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload) {
-    return { id: payload.sub, role: payload.role ?? 'user' };
+    return { id: payload.sub, role: payload.role ?? 'user', channel: payload.channel };
   }
 }
