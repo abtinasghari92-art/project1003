@@ -42,3 +42,14 @@ pnpm dev
 
 `apps/*/public/brand/logo.png` و `footer-ad.png` و فایل‌های Peyda در `public/fonts/peyda/`.
 تا قبل از قرارگیری فایل واقعی، SVG و Vazirmatn استفاده می‌شود.
+
+## دیپلوی Vercel (telegram-web)
+
+مونورپو است؛ Root Directory را روی اپ Next بگذارید وگرنه Vercel `package.json` ریشه را می‌بیند که `next` ندارد.
+
+1. Vercel → Project → **Settings** → **General** → **Root Directory**
+2. مقدار: `apps/telegram-web`
+3. Save و Redeploy
+
+Framework Preset: Next.js
+
