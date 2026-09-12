@@ -21,3 +21,13 @@ export function getBaleWebApp() {
   if (typeof window === 'undefined') return undefined;
   return (window as BaleWindow).Bale?.WebApp;
 }
+
+/** Bale's SDK exposes the same signed launch payload after it initializes. */
+export function getBaleInitData() {
+  if (typeof window === 'undefined') return '';
+  const fromSdk = getBaleWebApp()?.initData;
+  if (fromSdk) return fromSdk;
+
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  return hash.get('WebAppData') ?? hash.get('tgWebAppData') ?? '';
+}
