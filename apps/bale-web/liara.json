@@ -1,6 +1,6 @@
 {
   "platform": "docker",
-  "app": "majaramag-bale",
+  "app": "majarabale",
   "port": 3001,
   "dockerfile": "Dockerfile.bale-web"
 }

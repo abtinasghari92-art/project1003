@@ -1,6 +1,6 @@
 {
   "platform": "docker",
-  "app": "majaramag",
+  "app": "majaraapi",
   "port": 4000,
   "dockerfile": "Dockerfile.api"
 }
