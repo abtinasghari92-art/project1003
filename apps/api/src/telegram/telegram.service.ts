@@ -5,6 +5,11 @@ type TelegramUpdate = {
   message?: { chat?: { id?: number }; text?: string };
 };
 
+function toMagazineUrl(webAppUrl: string, magazineUrl?: string) {
+  if (magazineUrl) return magazineUrl;
+  return `${webAppUrl.replace(/\/$/, '')}/magazines`;
+}
+
 @Injectable()
 export class TelegramService {
   private readonly logger = new Logger(TelegramService.name);
@@ -23,20 +28,30 @@ export class TelegramService {
       return;
     }
 
+    const magazineUrl = toMagazineUrl(
+      webAppUrl,
+      this.config.get<string>('TELEGRAM_MAGAZINE_URL'),
+    );
     const replyMarkup = {
-      inline_keyboard: [[{ text: 'ورود به ماجرا', web_app: { url: webAppUrl } }]],
+      inline_keyboard: [
+        [{ text: '📚 مشاهده مجله', web_app: { url: magazineUrl } }],
+        [{ text: '✨ ورود به مینی‌اپ ماجرا', web_app: { url: webAppUrl } }],
+      ],
     };
     const welcomeImage = this.config.get<string>('TELEGRAM_WELCOME_IMAGE_URL');
+    const welcomeText =
+      'به ماجرا خوش آمدید ✨\n\n' +
+      'تازه‌ترین شماره‌های مجله را ببینید، ورق بزنید و تهیه کنید.';
     const payload = welcomeImage
       ? {
           chat_id: chatId,
           photo: welcomeImage,
-          caption: 'به ماجرا خوش آمدید ✨\nمجله‌ها و شماره‌های تازه را در مینی‌اپ ببینید و خرید کنید.',
+          caption: welcomeText,
           reply_markup: replyMarkup,
         }
       : {
           chat_id: chatId,
-          text: 'به ماجرا خوش آمدید ✨\nمجله‌ها و شماره‌های تازه را در مینی‌اپ ببینید و خرید کنید.',
+          text: welcomeText,
           reply_markup: replyMarkup,
         };
     const method = welcomeImage ? 'sendPhoto' : 'sendMessage';
