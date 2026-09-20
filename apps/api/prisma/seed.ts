@@ -23,6 +23,32 @@ async function main() {
     },
   });
 
+  const issue = await prisma.issue.findFirst({
+    where: { magazineId: magazine.id },
+    orderBy: { number: 'desc' },
+  });
+  if (issue) {
+    const fixtures = [
+      { guestName: 'سارا', body: 'طراحی و روایت این شماره خیلی دوست‌داشتنی بود.', stars: 5 },
+      { guestName: 'امیر', body: 'بریده‌های شماره کمک کرد تصمیم بگیرم آن را بخرم.', stars: 4 },
+    ];
+    for (const fixture of fixtures) {
+      await prisma.comment.upsert({
+        where: { id: `fixture-${issue.id}-${fixture.guestName}` },
+        update: {},
+        create: {
+          id: `fixture-${issue.id}-${fixture.guestName}`,
+          issueId: issue.id,
+          guestName: fixture.guestName,
+          body: fixture.body,
+          stars: fixture.stars,
+          status: 'APPROVED',
+          moderatedAt: new Date(),
+        },
+      });
+    }
+  }
+
   const email = process.env.ADMIN_EMAIL;
   const password = process.env.ADMIN_PASSWORD;
   if (email && password) {

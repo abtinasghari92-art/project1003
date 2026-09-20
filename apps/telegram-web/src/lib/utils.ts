@@ -6,5 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatRial(amount: number) {
-  return new Intl.NumberFormat('fa-IR').format(amount) + ' ریال';
+  return new Intl.NumberFormat('fa-IR-u-nu-latn').format(amount) + ' ریال';
 }

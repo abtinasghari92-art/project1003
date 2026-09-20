@@ -21,7 +21,17 @@ import {
   CreateMagazineDto,
   UpdateIssueDto,
   UpdateMagazineDto,
+  AdminCommentsQueryDto,
+  BulkModerateCommentsDto,
+  CommentReplyDto,
+  UpdateCommentDto,
+  UpdatePromotionDto,
+  UpdateDeliverySettingsDto,
 } from './admin.dto';
+import { CommentStatus } from '@prisma/client';
+import { CommentsService } from '../comments/comments.service';
+import { PromotionsService } from '../promotions/promotions.service';
+import { ShippingService } from '../shipping/shipping.service';
 
 @Controller('admin')
 export class AdminController {
@@ -29,6 +39,9 @@ export class AdminController {
     private readonly auth: AdminAuthService,
     private readonly crm: AdminCrmService,
     private readonly catalog: AdminCatalogService,
+    private readonly comments: CommentsService,
+    private readonly promotions: PromotionsService,
+    private readonly shipping: ShippingService,
   ) {}
 
   @Post('auth/login')
@@ -82,6 +95,48 @@ export class AdminController {
     return this.crm.getOrder(id);
   }
 
+  @Get('audit-logs')
+  @AdminOnly()
+  auditLogs() {
+    return this.crm.listAuditLogs();
+  }
+
+  @Get('comments')
+  @AdminOnly()
+  commentsList(@Query() query: AdminCommentsQueryDto) {
+    return this.comments.listAdmin(query);
+  }
+
+  @Patch('comments/:id/status')
+  @AdminOnly()
+  moderateComment(@Param('id') id: string, @Query('status') status: 'APPROVED' | 'REJECTED', @CurrentUser() admin: AuthUser) {
+    return this.comments.moderate(id, status as CommentStatus, admin.id);
+  }
+
+  @Post('comments/bulk')
+  @AdminOnly()
+  bulkModerate(@Body() dto: BulkModerateCommentsDto, @CurrentUser() admin: AuthUser) {
+    return this.comments.bulkModerate(dto.ids, dto.status as CommentStatus, admin.id);
+  }
+
+  @Patch('comments/:id')
+  @AdminOnly()
+  editComment(@Param('id') id: string, @Body() dto: UpdateCommentDto, @CurrentUser() admin: AuthUser) {
+    return this.comments.update(id, dto, admin.id);
+  }
+
+  @Post('comments/:id/reply')
+  @AdminOnly()
+  replyComment(@Param('id') id: string, @Body() dto: CommentReplyDto, @CurrentUser() admin: AuthUser) {
+    return this.comments.reply(id, dto, admin.id);
+  }
+
+  @Delete('comments/:id')
+  @AdminOnly()
+  deleteComment(@Param('id') id: string, @CurrentUser() admin: AuthUser) {
+    return this.comments.remove(id, admin.id);
+  }
+
   @Get('magazines')
   @AdminOnly()
   magazines() {
@@ -122,5 +177,29 @@ export class AdminController {
   @AdminOnly()
   deleteIssue(@Param('id') id: string) {
     return this.catalog.deleteIssue(id);
+  }
+
+  @Get('promotion')
+  @AdminOnly()
+  promotion() {
+    return this.promotions.config();
+  }
+
+  @Patch('promotion')
+  @AdminOnly()
+  updatePromotion(@Body() dto: UpdatePromotionDto) {
+    return this.promotions.update(dto);
+  }
+
+  @Get('delivery-settings')
+  @AdminOnly()
+  deliverySettings() {
+    return this.shipping.settings();
+  }
+
+  @Patch('delivery-settings')
+  @AdminOnly()
+  updateDeliverySettings(@Body() dto: UpdateDeliverySettingsDto) {
+    return this.shipping.update(dto);
   }
 }

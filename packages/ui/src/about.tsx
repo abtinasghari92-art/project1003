@@ -1,5 +1,7 @@
 'use client';
 
+import { Highlight } from './highlight';
+
 export const ABOUT_PARAGRAPHS = [
   'ملاصدرا می‌گوید هر فکر و قول اصیل مسبوق به ادراک بسیط است. مستظهر به این حکمت، تاریخ هم اگر بناست چیزی بگوید اولا باید بر یک شاکله فکری (پارادایم) استوار باشد. بدیهی است که مورخان هر چیزی را نمی‌نویسند. آنها قلم‌شان را صرف «مسئله‌ها» می‌کنند. اما چطور می‌توان مسئله‌ها را از نامسئله‌ها تمیز داد؟ چه بسیار وقایع و پیش‌آمدها که قیل و قال بسیار به راه اندازند اما نه روشن‌کننده که پوشاننده باشند. اگر پای نوشتن و گفتن تاریخ معاصر در میان باشد که این بحران بسی عمیقتر است. تنها در صورتی می‌توان از تاریخ معاصر نوشت که مسائل معاصر را بشناسیم، اگر نه به جای تاریخ‌نویسی در غرقاب بگومگوهای روزمره هلاک می‌شویم. جداکردن نزاع‌های سیاسی و حزبی از حادثه‌های تاریخی نه با فربه کردن اوراق پژوهش که با سفتن قلب از زنگار مشهورات ممکن است.',
   'خطر دیگر، اشتباه گرفتن واقعیت‌ها به جای مسئله‌ها است. گرانی، رنج معاش، دشمنی دشمنان، خیانت یا سستی دوستان و چیزهایی از این قبیل در زمره واقعیت‌ها هستند نه مسائل. این واقعیت‌ها تنها زمانی تبدیل به مسئله می‌شوند که بدانیم این مشکلات از کجا آمده‌اند و چطور می‌توان از آنها خلاص شد؟ آنگاه شاید مسئله اصلی بی‌مسئلگی ما باشد. برای نجات از بی‌مسئلگی باید به خود بیاندیشیم و طرحی برای آینده داشته باشیم.',
@@ -9,20 +11,22 @@ export const ABOUT_PARAGRAPHS = [
 
 export function AboutMajara() {
   return (
-    <section id="darbare" className="border border-[var(--majara-ink)] bg-white">
+    <section id="darbare" className="majara-panel">
       <header className="flex items-end justify-between border-b-2 border-[var(--majara-red)] px-3 py-2">
         <div>
           <p
-            className="text-2xl leading-none text-[var(--majara-red)]"
+            className="text-2xl leading-none font-bold text-[var(--majara-red)]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             ماجرا
           </p>
           <p className="mt-1 text-[10px] text-[var(--majara-muted)]">فصل‌نامه تاریخی-سیاسی</p>
         </div>
-        <p className="text-[11px] font-bold">درباره ماجرا</p>
+        <p className="text-[11px] font-bold">
+          <Highlight>درباره</Highlight> ماجرا
+        </p>
       </header>
-      <div className="space-y-4 p-4 text-[13px] leading-7 text-[#1b1b1b]">
+      <div className="space-y-4 p-4 text-[13px] leading-7 text-[var(--majara-ink)]">
         {ABOUT_PARAGRAPHS.map((paragraph) => (
           <p key={paragraph.slice(0, 24)} className="text-justify">
             {paragraph}

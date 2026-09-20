@@ -1,29 +1,40 @@
+'use client';
+
+import { useState } from 'react';
+
 export function MagazineCover({
   title = 'میراث از دست رفته',
   issue = 3,
   season = 'زمستان ۱۴۰۳',
   imageSrc,
+  bare = false,
 }: {
   title?: string;
   issue?: number;
   season?: string;
   imageSrc?: string;
+  bare?: boolean;
 }) {
-  if (imageSrc) {
+  const [broken, setBroken] = useState(false);
+  const showImage = Boolean(imageSrc) && !broken;
+  const frame = {
+    position: 'relative' as const,
+    width: '100%',
+    aspectRatio: '3 / 4.2',
+    overflow: 'hidden',
+    borderRadius: bare ? '16px 16px 0 0' : 16,
+    background: '#3c3c3b',
+    boxShadow: bare ? 'none' : '0 10px 22px rgba(60,60,59,.16)',
+  };
+
+  if (showImage) {
     return (
-      <div
-        style={{
-          position: 'relative',
-          aspectRatio: '3 / 4.2',
-          overflow: 'hidden',
-          background: '#111',
-          boxShadow: '0 18px 40px rgba(0,0,0,.28)',
-        }}
-      >
+      <div style={frame}>
         <img
           src={imageSrc}
           alt={`${title} — شماره ${issue}`}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          onError={() => setBroken(true)}
         />
       </div>
     );
@@ -32,24 +43,11 @@ export function MagazineCover({
   return (
     <div
       style={{
-        position: 'relative',
-        aspectRatio: '3 / 4.2',
-        overflow: 'hidden',
-        background:
-          'radial-gradient(120% 80% at 50% 20%, #5a534c 0%, #2c2723 42%, #12100e 100%)',
+        ...frame,
+        background: 'radial-gradient(120% 80% at 50% 20%, #5a534c 0%, #3c3c3b 42%, #2a2a29 100%)',
         color: '#fff',
-        boxShadow: '0 18px 40px rgba(0,0,0,.28)',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'linear-gradient(180deg, rgba(0,0,0,.15), transparent 30%, rgba(0,0,0,.55) 100%)',
-        }}
-      />
-      <div className="majara-scratch" style={{ position: 'absolute', inset: 0, opacity: 0.22 }} />
       <div
         style={{
           position: 'absolute',
@@ -64,7 +62,7 @@ export function MagazineCover({
           paddingBottom: 6,
         }}
       >
-        <span style={{ color: '#e20613', fontFamily: 'var(--font-display)', fontSize: 22 }}>
+        <span style={{ color: '#e42528', fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700 }}>
           ماجرا
         </span>
         <span style={{ opacity: 0.85 }}>تاریخی · سیاسی</span>
@@ -97,8 +95,8 @@ export function MagazineCover({
           style={{
             width: 28,
             height: 28,
-            borderRadius: 999,
-            background: '#e20613',
+            background: '#e42528',
+            borderRadius: 8,
             display: 'grid',
             placeItems: 'center',
             fontSize: 13,
@@ -113,6 +111,7 @@ export function MagazineCover({
             margin: 0,
             fontFamily: 'var(--font-display)',
             fontSize: 22,
+            fontWeight: 700,
             lineHeight: 1.05,
           }}
         >

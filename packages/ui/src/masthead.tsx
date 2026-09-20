@@ -1,5 +1,7 @@
 'use client';
 
+import { Highlight } from './highlight';
+
 export const MASTHEAD_ROWS = [
   { role: 'مدیر مسئول', names: 'محمد مهدی دادمان' },
   { role: 'جانشین مدیر مسئول', names: 'سید یزدان حبیبی' },
@@ -18,18 +20,20 @@ export const MASTHEAD_ROWS = [
 
 export function Masthead({ compact = false }: { compact?: boolean }) {
   return (
-    <section id="shenasnameh" className="border border-[var(--majara-ink)] bg-white">
+    <section id="shenasnameh" className="majara-panel">
       <header className="flex items-end justify-between border-b-2 border-[var(--majara-red)] px-3 py-2">
         <div>
           <p
-            className="text-2xl leading-none text-[var(--majara-red)]"
+            className="text-2xl leading-none font-bold text-[var(--majara-red)]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             ماجرا
           </p>
           <p className="mt-1 text-[10px] text-[var(--majara-muted)]">فصل‌نامه تاریخی-سیاسی</p>
         </div>
-        <p className="text-[11px] font-bold">شناسنامه · شماره سوم</p>
+        <p className="text-[11px] font-bold">
+          <Highlight>شناسنامه</Highlight> · شماره سوم
+        </p>
       </header>
       <dl className={compact ? 'space-y-2 p-3' : 'space-y-3 p-4'}>
         {MASTHEAD_ROWS.map((row) => (

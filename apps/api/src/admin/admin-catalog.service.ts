@@ -63,12 +63,16 @@ export class AdminCatalogService {
 
   async createIssue(dto: CreateIssueDto) {
     await this.requireMagazine(dto.magazineId);
+    if (dto.originalPriceRial !== undefined && dto.originalPriceRial <= dto.priceRial) {
+      throw new BadRequestException('قیمت قبل از تخفیف باید بیشتر از قیمت فروش باشد');
+    }
     return this.prisma.issue.create({
       data: {
         magazineId: dto.magazineId,
         title: dto.title.trim(),
         number: dto.number,
         priceRial: dto.priceRial,
+        originalPriceRial: dto.originalPriceRial ?? null,
         coverUrl: dto.coverUrl?.trim() || null,
         pdfKey: dto.pdfKey?.trim() || null,
       },
@@ -76,13 +80,20 @@ export class AdminCatalogService {
   }
 
   async updateIssue(id: string, dto: UpdateIssueDto) {
-    await this.requireIssue(id);
+    const current = await this.requireIssue(id);
+    const priceRial = dto.priceRial ?? current.priceRial;
+    const originalPriceRial =
+      dto.originalPriceRial === undefined ? current.originalPriceRial : dto.originalPriceRial;
+    if (originalPriceRial !== null && originalPriceRial !== undefined && originalPriceRial <= priceRial) {
+      throw new BadRequestException('قیمت قبل از تخفیف باید بیشتر از قیمت فروش باشد');
+    }
     return this.prisma.issue.update({
       where: { id },
       data: {
         title: dto.title?.trim(),
         number: dto.number,
-        priceRial: dto.priceRial,
+        priceRial,
+        originalPriceRial,
         coverUrl: dto.coverUrl === undefined ? undefined : dto.coverUrl.trim() || null,
         pdfKey: dto.pdfKey === undefined ? undefined : dto.pdfKey.trim() || null,
       },

@@ -28,3 +28,22 @@ body {
   font-weight: 700;
   color: var(--majara-muted);
 }
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 4px;
+  border-radius: 999px;
+}
+
+@media print {
+  aside,
+  button,
+  form {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+}

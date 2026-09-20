@@ -40,7 +40,7 @@ pnpm dev
 
 ## دارایی برند
 
-`apps/*/public/brand/logo.png` و `footer-ad.png` و فایل‌های Peyda در `public/fonts/peyda/`.
+`apps/*/public/brand/logo.png` و `footer-ad.png` و فایل‌های w_Zar در `public/fonts/zar/`.
 تا قبل از قرارگیری فایل واقعی، SVG و Vazirmatn استفاده می‌شود.
 
 ## دیپلوی Vercel (telegram-web)

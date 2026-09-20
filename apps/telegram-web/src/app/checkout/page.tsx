@@ -4,10 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type {
   CartDto,
-  MagazineDto,
   OrderDto,
   PaymentIntentDto,
   PublicUser,
+  ShippingOptionDto,
 } from '@majara/types';
 import { CheckoutScreen, type CheckoutSubmitPayload } from '@majara/ui';
 import { AppShell } from '@/components/shell';
@@ -17,39 +17,29 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [cart, setCart] = useState<CartDto | null>(null);
   const [user, setUser] = useState<PublicUser | null>(null);
-  const [fallback, setFallback] = useState<{
-    id: string;
-    title: string;
-    number: number;
-    priceRial: number;
-    qty: number;
-  } | null>(null);
+  const [deliveryOptions, setDeliveryOptions] = useState<ShippingOptionDto[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    void api<CartDto>('/cart').then(setCart).catch(() => setCart(null));
-    void api<PublicUser>('/me').then(setUser).catch(() => setUser(null));
-  }, []);
-
-  useEffect(() => {
-    if (cart?.items.length) return;
-    void api<MagazineDto[]>('/magazines')
-      .then((magazines) => {
-        const issue = magazines[0]?.issues?.[0];
-        if (!issue) return;
-        setFallback({
-          id: issue.id,
-          title: issue.title,
-          number: issue.number,
-          priceRial: issue.priceRial,
-          qty: 1,
+    void Promise.all([api<CartDto>('/cart'), api<PublicUser>('/me')])
+      .then(([nextCart, nextUser]) => {
+        setCart(nextCart);
+        setUser(nextUser);
+        return api<ShippingOptionDto[]>('/shipping/quote', {
+          method: 'POST',
+          body: JSON.stringify({ province: nextUser.province ?? 'تهران' }),
         });
       })
-      .catch(() => undefined);
-  }, [cart]);
+      .then(setDeliveryOptions)
+      .catch(() => {
+        setCart(null);
+        setUser(null);
+        setDeliveryOptions([]);
+      });
+  }, []);
 
-  const items = cart?.items.length ? cart.items : fallback ? [fallback] : [];
+  const items = cart?.items ?? [];
   const shippingRial = cart?.shippingRial ?? 70_000;
 
   const initialAddress = useMemo(
@@ -65,6 +55,19 @@ export default function CheckoutPage() {
     }),
     [user],
   );
+
+  async function refreshDeliveryOptions(province: string) {
+    try {
+      setDeliveryOptions(
+        await api<ShippingOptionDto[]>('/shipping/quote', {
+          method: 'POST',
+          body: JSON.stringify({ province }),
+        }),
+      );
+    } catch {
+      setDeliveryOptions([]);
+    }
+  }
 
   async function onSubmit(payload: CheckoutSubmitPayload) {
     setBusy(true);
@@ -96,10 +99,12 @@ export default function CheckoutPage() {
       <CheckoutScreen
         items={items}
         shippingRial={shippingRial}
+        deliveryOptions={deliveryOptions}
         initialAddress={initialAddress}
         busy={busy}
         error={error}
         cryptoEnabled
+        onProvinceChange={(province) => void refreshDeliveryOptions(province)}
         onSubmit={onSubmit}
         onEditOrder={() => router.push('/cart')}
       />

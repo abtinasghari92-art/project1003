@@ -3,6 +3,17 @@
 .cursor
 .vercel
 .turbo
+.env
+.env.*
+node_modules
+apps/api/node_modules
+apps/admin/node_modules
+apps/bale-web/node_modules
+apps/telegram-web/node_modules
+packages/ui/node_modules
+apps/admin/.next
+apps/bale-web/.next
+apps/telegram-web/.next
 **/.turbo
 **/.next
 **/dist

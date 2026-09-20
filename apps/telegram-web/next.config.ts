@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@majara/ui', '@majara/types'],
+  transpilePackages: ['@majara/ui', '@majara/types', '@phosphor-icons/react'],
   output: 'standalone',
   outputFileTracingRoot: path.join(__dirname, '../..'),
 };

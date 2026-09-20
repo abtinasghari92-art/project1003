@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Masthead } from './masthead';
 import { AboutMajara } from './about';
+import { BrandIcon } from './brand-icon';
+import { Highlight } from './highlight';
+import { Masthead } from './masthead';
 
 const PAGES = [
   {
-    src: '/issues/3/cover.jpg',
+    src: '/issues/3/cover.png',
     label: 'جلد',
     caption: 'شماره سوم · زمستان ۱۴۰۳ · میراث از دست رفته',
   },
@@ -27,19 +29,19 @@ export function PreviewScreen() {
 
   return (
     <div className="pb-8">
-      <header className="mb-4 border-b border-black/10 pb-3">
-        <p
-          className="mb-1 text-3xl text-[var(--majara-red)]"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
-          ماجرا
-        </p>
-        <p className="text-[11px] text-[var(--majara-muted)]">پیش‌نمایش شماره سوم · زمستان ۱۴۰۳</p>
+      <header className="mb-4 flex items-center gap-3 border-b-2 border-[var(--majara-gold)] pb-3">
+        <BrandIcon name="play" size={28} />
+        <div>
+          <p className="mb-1 text-2xl font-bold text-[var(--majara-red)]">ماجرا</p>
+          <p className="text-[11px] text-[var(--majara-muted)]">
+            <Highlight>پیش‌نمایش</Highlight> شماره سوم · زمستان ۱۴۰۳
+          </p>
+        </div>
       </header>
 
       <div className="space-y-5">
         {PAGES.map((page) => (
-          <figure key={page.src} className="border border-[var(--majara-line)] bg-white">
+          <figure key={page.src} className="majara-panel">
             <button
               type="button"
               className="block w-full"

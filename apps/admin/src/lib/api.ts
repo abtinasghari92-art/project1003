@@ -28,7 +28,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   try {
     response = await fetch(`${API_URL}${path}`, { ...init, headers });
   } catch {
-    throw new Error('اتصال به سرور برقرار نشد. API را روی پورت ۴۰۰۰ اجرا کنید.');
+    throw new Error('ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.');
   }
   if (!response.ok) {
     const body = await response.json().catch(() => ({ message: response.statusText }));

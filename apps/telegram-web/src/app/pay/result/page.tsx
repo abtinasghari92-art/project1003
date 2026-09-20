@@ -12,7 +12,7 @@ function ResultBody() {
   const paid = status === 'paid';
   return (
     <AppShell>
-      <h1 className="mb-3 font-[family-name:var(--font-display)] text-2xl">{paid ? 'پرداخت موفق' : 'پرداخت ناموفق'}</h1>
+      <h1 className="mb-3 text-2xl font-bold">{paid ? 'پرداخت موفق' : 'پرداخت ناموفق'}</h1>
       <p className="mb-6 text-sm text-[var(--majara-muted)]">
         درگاه: {params.get('provider') ?? '—'}
       </p>

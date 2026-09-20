@@ -11,6 +11,15 @@ export type PaymentStatus =
 
 export type OrderStatus = 'DRAFT' | 'PENDING_PAYMENT' | 'PAID' | 'CANCELED';
 
+export type DeliveryMethod = 'POST' | 'COURIER_TEHRAN';
+
+export interface ShippingOptionDto {
+  id: DeliveryMethod;
+  title: string;
+  description: string;
+  shippingRial: number;
+}
+
 export interface AuthSession {
   token: string;
   user: PublicUser;
@@ -53,6 +62,7 @@ export interface IssueDto {
   title: string;
   number: number;
   priceRial: number;
+  originalPriceRial: number | null;
   coverUrl: string | null;
 }
 
@@ -84,12 +94,21 @@ export interface CheckoutAddress {
   notes?: string;
 }
 
+export interface SavedAddressDto extends CheckoutAddress {
+  id: string;
+  label: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface OrderDto {
   id: string;
   status: OrderStatus;
   amountRial: number;
   amountUsd: string | null;
   shippingRial: number;
+  deliveryMethod: DeliveryMethod;
   items: OrderItemDto[];
   firstName: string | null;
   lastName: string | null;
@@ -99,6 +118,7 @@ export interface OrderDto {
   postalCode: string | null;
   phone: string | null;
   notes: string | null;
+  createdAt: string;
 }
 
 export interface OrderItemDto {

@@ -12,6 +12,11 @@ import { StorageModule } from './storage/storage.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { BaleModule } from './bale/bale.module';
 import { AdminModule } from './admin/admin.module';
+import { CommentsModule } from './comments/comments.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { PromotionsModule } from './promotions/promotions.module';
+import { ShippingModule } from './shipping/shipping.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -31,6 +36,11 @@ import { AdminModule } from './admin/admin.module';
     TelegramModule,
     BaleModule,
     AdminModule,
+    CommentsModule,
+    AnalyticsModule,
+    PromotionsModule,
+    ShippingModule,
+    AddressesModule,
   ],
 })
 export class AppModule {}

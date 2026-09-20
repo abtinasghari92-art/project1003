@@ -1,6 +1,7 @@
 import { Transform } from 'class-transformer';
 import {
   IsOptional,
+  IsIn,
   IsString,
   Matches,
   MaxLength,
@@ -26,6 +27,9 @@ function asPhone(value: unknown) {
 }
 
 export class CheckoutDto {
+  @IsIn(['POST', 'COURIER_TEHRAN'], { message: 'روش ارسال نامعتبر است' })
+  deliveryMethod!: 'POST' | 'COURIER_TEHRAN';
+
   @Transform(({ value }) => trimString(value))
   @IsString()
   @MinLength(2, { message: 'نام را وارد کنید' })

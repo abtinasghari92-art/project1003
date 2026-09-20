@@ -15,6 +15,7 @@ const emptyIssue = {
   title: '',
   number: '1',
   priceRial: '',
+  originalPriceRial: '',
   coverUrl: '',
   pdfKey: '',
 };
@@ -32,7 +33,7 @@ function Catalog() {
   const [magazineForm, setMagazineForm] = useState(emptyMagazine);
   const [issueForm, setIssueForm] = useState(emptyIssue);
   const [error, setError] = useState('');
-  const [editing, setEditing] = useState<Record<string, { title: string; coverUrl: string; pdfKey: string; priceRial: string }>>(
+  const [editing, setEditing] = useState<Record<string, { title: string; coverUrl: string; pdfKey: string; priceRial: string; originalPriceRial: string }>>(
     {},
   );
 
@@ -83,6 +84,7 @@ function Catalog() {
           title: issueForm.title,
           number: Number(issueForm.number),
           priceRial: Number(issueForm.priceRial),
+          originalPriceRial: issueForm.originalPriceRial ? Number(issueForm.originalPriceRial) : undefined,
           coverUrl: issueForm.coverUrl || undefined,
           pdfKey: issueForm.pdfKey || undefined,
         }),
@@ -103,6 +105,7 @@ function Catalog() {
         body: JSON.stringify({
           title: draft.title,
           priceRial: Number(draft.priceRial),
+          originalPriceRial: draft.originalPriceRial ? Number(draft.originalPriceRial) : null,
           coverUrl: draft.coverUrl,
           pdfKey: draft.pdfKey,
         }),
@@ -202,6 +205,13 @@ function Catalog() {
               required
             />
             <Input
+              placeholder="قیمت قبل از تخفیف (اختیاری)"
+              type="number"
+              min={0}
+              value={issueForm.originalPriceRial}
+              onChange={(e) => setIssueForm({ ...issueForm, originalPriceRial: e.target.value })}
+            />
+            <Input
               placeholder="URL جلد"
               value={issueForm.coverUrl}
               onChange={(e) => setIssueForm({ ...issueForm, coverUrl: e.target.value })}
@@ -239,6 +249,7 @@ function Catalog() {
                   <th>شماره</th>
                   <th>عنوان</th>
                   <th>قیمت</th>
+                  <th>قیمت قبل از تخفیف</th>
                   <th>جلد URL</th>
                   <th>pdfKey</th>
                   <th></th>
@@ -266,6 +277,18 @@ function Catalog() {
                           />
                         ) : (
                           formatRial(issue.priceRial)
+                        )}
+                      </td>
+                      <td>
+                        {draft ? (
+                          <Input
+                            type="number"
+                            min={0}
+                            value={draft.originalPriceRial}
+                            onChange={(e) => setEditing({ ...editing, [issue.id]: { ...draft, originalPriceRial: e.target.value } })}
+                          />
+                        ) : (
+                          issue.originalPriceRial ? formatRial(issue.originalPriceRial) : '—'
                         )}
                       </td>
                       <td>
@@ -303,6 +326,7 @@ function Catalog() {
                                 [issue.id]: {
                                   title: issue.title,
                                   priceRial: String(issue.priceRial),
+                                  originalPriceRial: issue.originalPriceRial ? String(issue.originalPriceRial) : '',
                                   coverUrl: issue.coverUrl ?? '',
                                   pdfKey: issue.pdfKey ?? '',
                                 },
@@ -326,7 +350,7 @@ function Catalog() {
                 })}
                 {magazine.issues.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-[var(--majara-muted)]">
+                    <td colSpan={7} className="py-6 text-center text-[var(--majara-muted)]">
                       شماره‌ای نیست
                     </td>
                   </tr>

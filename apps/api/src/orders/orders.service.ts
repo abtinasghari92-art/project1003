@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { orderAmountRial, resolveShippingRial, rialToUsd } from '@majara/utils';
+import { DeliveryMethod } from '@prisma/client';
+import { orderAmountRial, rialToUsd } from '@majara/utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
 import type { CheckoutDto } from './orders.dto';
+import { ShippingService } from '../shipping/shipping.service';
 
 @Injectable()
 export class OrdersService {
@@ -11,17 +13,22 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly cart: CartService,
     private readonly config: ConfigService,
+    private readonly shipping: ShippingService,
   ) {}
 
   async checkout(userId: string, dto: CheckoutDto) {
     const cart = await this.cart.getOrCreate(userId);
-    const sourceItems = cart.items.length > 0 ? cart.items : await this.fixtureItems();
+    if (cart.items.length === 0) {
+      throw new BadRequestException('سبد خرید خالی است');
+    }
+    const sourceItems = cart.items;
 
     const subtotalRial = sourceItems.reduce(
       (sum, item) => sum + item.issue.priceRial * item.qty,
       0,
     );
-    const shippingRial = resolveShippingRial(this.config.get('SHIPPING_RIAL'));
+    const delivery = await this.shipping.resolve(dto.province, dto.deliveryMethod as DeliveryMethod);
+    const shippingRial = delivery.shippingRial;
     const amountRial = orderAmountRial(subtotalRial, shippingRial);
     const rate = Number(this.config.get('USD_TO_IRR_RATE') ?? 800000);
     const notes = dto.notes?.trim() ? dto.notes.trim() : null;
@@ -32,6 +39,7 @@ export class OrdersService {
         amountRial,
         amountUsd: rialToUsd(amountRial, rate),
         shippingRial,
+        deliveryMethod: delivery.id,
         firstName: dto.firstName,
         lastName: dto.lastName,
         province: dto.province,
@@ -84,6 +92,7 @@ export class OrdersService {
     amountRial: number;
     amountUsd: unknown;
     shippingRial: number;
+    deliveryMethod: DeliveryMethod;
     firstName: string | null;
     lastName: string | null;
     province: string | null;
@@ -92,6 +101,7 @@ export class OrdersService {
     postalCode: string | null;
     phone: string | null;
     notes: string | null;
+    createdAt: Date;
     items: { id: string; title: string; priceRial: number; qty: number }[];
   }) {
     return {
@@ -100,6 +110,7 @@ export class OrdersService {
       amountRial: order.amountRial,
       amountUsd: order.amountUsd == null ? null : String(order.amountUsd),
       shippingRial: order.shippingRial,
+      deliveryMethod: order.deliveryMethod,
       firstName: order.firstName,
       lastName: order.lastName,
       province: order.province,
@@ -109,12 +120,8 @@ export class OrdersService {
       phone: order.phone,
       notes: order.notes,
       items: order.items,
+      createdAt: order.createdAt.toISOString(),
     };
   }
 
-  private async fixtureItems() {
-    const fallback = await this.prisma.issue.findFirst({ orderBy: { number: 'desc' } });
-    if (!fallback) throw new BadRequestException('شماره‌ای برای خرید وجود ندارد');
-    return [{ issueId: fallback.id, qty: 1, issue: fallback }];
-  }
 }

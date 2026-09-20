@@ -6,11 +6,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatRial(amount: number) {
-  return new Intl.NumberFormat('fa-IR').format(amount) + ' ریال';
+  return new Intl.NumberFormat('fa-IR-u-nu-latn').format(amount) + ' ریال';
 }
 
 export function formatDate(value: string | Date) {
-  return new Intl.DateTimeFormat('fa-IR', {
+  return new Intl.DateTimeFormat('fa-IR-u-nu-latn', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value));

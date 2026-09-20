@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { useState } from 'react';
-import { DistressedMark } from './mark';
+import { LogoMark } from './mark';
 
 export interface LandingPageProps {
   telegramBotUsername: string;
@@ -16,8 +16,8 @@ const pageStyle: CSSProperties = {
   minHeight: '100dvh',
   display: 'flex',
   flexDirection: 'column',
-  background: '#050505',
-  color: '#f4f1ec',
+  backgroundColor: '#f4efe6',
+  color: '#3c3c3b',
   position: 'relative',
 };
 
@@ -28,14 +28,8 @@ const mainStyle: CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   padding: '2.4rem 1.25rem 1.2rem',
-  gap: '1.4rem',
+  gap: '1.2rem',
   zIndex: 1,
-};
-
-const logoStyle: CSSProperties = {
-  width: 'min(280px, 78vw)',
-  height: 'auto',
-  filter: 'contrast(1.15)',
 };
 
 const actionsStyle: CSSProperties = {
@@ -50,32 +44,31 @@ const btnBase: CSSProperties = {
   display: 'block',
   textAlign: 'center',
   textDecoration: 'none',
-  borderRadius: 0,
+  borderRadius: 16,
   padding: '0.95rem 1.1rem',
   fontWeight: 700,
   fontSize: '0.95rem',
-  letterSpacing: '0.02em',
 };
 
 const primaryBtn: CSSProperties = {
   ...btnBase,
-  background: '#e20613',
+  background: '#e42528',
   color: '#fff',
-  border: '1px solid #e20613',
+  border: '1px solid #e42528',
 };
 
 const secondaryBtn: CSSProperties = {
   ...btnBase,
   background: 'transparent',
-  color: '#fff',
-  border: '1px solid #fff',
+  color: '#3c3c3b',
+  border: '1px solid #3c3c3b',
 };
 
 const footerStyle: CSSProperties = {
   width: '100%',
   padding: 0,
   lineHeight: 0,
-  background: '#000',
+  background: '#3c3c3b',
   zIndex: 1,
 };
 
@@ -93,7 +86,7 @@ const adFallbackStyle: CSSProperties = {
   color: '#fff',
   padding: '1rem',
   fontSize: '0.8rem',
-  background: '#e20613',
+  background: '#e42528',
 };
 
 export function LandingPage({
@@ -103,44 +96,15 @@ export function LandingPage({
   logoSrc = '/brand/logo.png',
   footerAdSrc = '/brand/footer-ad.png',
 }: LandingPageProps): ReactElement {
-  const [logoOk, setLogoOk] = useState(true);
   const [adOk, setAdOk] = useState(true);
   const telegramHref = `https://t.me/${telegramBotUsername}?startapp`;
   const baleHref = `https://ble.ir/${baleBotUsername}`;
 
   return (
     <div style={pageStyle}>
-      <div className="majara-grain" />
       <main style={mainStyle}>
-        {logoOk ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={logoSrc}
-            alt="مجلّه ماجرا"
-            style={logoStyle}
-            onError={() => setLogoOk(false)}
-          />
-        ) : (
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ margin: '0 0 8px', color: '#e20613', fontSize: 12, letterSpacing: 4 }}>
-              فصل‌نامه
-            </p>
-            <span style={{ fontSize: '4.6rem', display: 'block' }}>
-              <DistressedMark text="مجلّه" />
-            </span>
-            <p
-              style={{
-                margin: '10px 0 0',
-                fontFamily: 'var(--font-display)',
-                fontSize: 28,
-                color: '#e20613',
-              }}
-            >
-              ماجرا
-            </p>
-          </div>
-        )}
-        <p style={{ margin: 0, color: '#b9b3ad', fontSize: 13 }}>روایت‌های واقعی</p>
+        <LogoMark size={92} src={logoSrc} />
+        <p style={{ margin: 0, color: '#6b6562', fontSize: 13 }}>روایت‌های واقعی</p>
         <div style={actionsStyle}>
           <a href={telegramHref} style={primaryBtn}>
             ورود به ربات تلگرام

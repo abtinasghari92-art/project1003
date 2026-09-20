@@ -29,5 +29,5 @@ export function getBaleInitData() {
   if (fromSdk) return fromSdk;
 
   const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-  return hash.get('WebAppData') ?? hash.get('tgWebAppData') ?? '';
+  return hash.get('tgWebAppData') ?? hash.get('WebAppData') ?? '';
 }

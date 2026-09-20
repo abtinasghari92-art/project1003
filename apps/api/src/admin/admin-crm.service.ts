@@ -114,4 +114,12 @@ export class AdminCrmService {
     if (!order) throw new NotFoundException('سفارش یافت نشد');
     return order;
   }
+
+  listAuditLogs() {
+    return this.prisma.adminAuditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 250,
+      include: { admin: { select: { name: true, email: true } } },
+    });
+  }
 }

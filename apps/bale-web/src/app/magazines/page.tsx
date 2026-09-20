@@ -1,33 +1,49 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { StorefrontHome } from '@majara/ui';
+import { useEffect, useMemo, useState } from 'react';
+import type { MagazineDto } from '@majara/types';
+import {
+  CATALOG_ISSUES,
+  StorefrontHome,
+  mergeCatalogWithApi,
+  notifyCartChanged,
+  type CatalogIssue,
+} from '@majara/ui';
 import { AppShell } from '@/components/shell';
 import { api } from '@/lib/api';
 
 export default function MagazinesPage() {
-  const router = useRouter();
+  const [issues, setIssues] = useState<CatalogIssue[]>(CATALOG_ISSUES);
+
+  useEffect(() => {
+    void api<MagazineDto[]>('/magazines')
+      .then((magazines) => setIssues(mergeCatalogWithApi(magazines.flatMap((item) => item.issues))))
+      .catch(() => undefined);
+  }, []);
+
+  const latest = useMemo(() => issues[0] ?? CATALOG_ISSUES[0], [issues]);
+
+  async function onAddToCart(id: string, quantity: number) {
+    await api('/cart/items', {
+      method: 'POST',
+      body: JSON.stringify({ issueId: id, qty: quantity }),
+    });
+    notifyCartChanged();
+  }
 
   return (
     <AppShell>
       <StorefrontHome
-        onBuy={async () => {
-          try {
-            const magazines = await api<{ issues: { id: string }[] }[]>('/magazines');
-            const issueId = magazines[0]?.issues?.[0]?.id;
-            if (issueId) {
-              await api('/cart/items', {
-                method: 'POST',
-                body: JSON.stringify({ issueId, qty: 1 }),
-              });
-            }
-          } catch {
-            /* fixture checkout still works */
-          }
-          router.push('/checkout');
-        }}
-        onPreview={() => router.push('/preview')}
-        onFavorite={() => router.push('/profile')}
+        latestId={latest.id}
+        latestTitle={latest.title}
+        latestSummary={latest.summary}
+        latestMeta={latest.meta}
+        latestIssue={latest.number}
+        latestCoverSrc={latest.coverSrc}
+        latestPriceRial={latest.priceRial}
+        archive={issues}
+        onAddToCart={onAddToCart}
+        analyticsChannel="BALE"
       />
     </AppShell>
   );

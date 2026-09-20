@@ -1,21 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
-import { Lalezar, Vazirmatn } from 'next/font/google';
 import { SentryInit } from '@/lib/sentry';
 import './globals.css';
-
-const vazirmatn = Vazirmatn({
-  subsets: ['arabic'],
-  variable: '--font-vazirmatn',
-  display: 'swap',
-});
-
-const lalezar = Lalezar({
-  weight: '400',
-  subsets: ['arabic'],
-  variable: '--font-lalezar',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'ماجرا | مجله روایت‌های واقعی',
@@ -25,20 +11,26 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#111111',
+  themeColor: '#f4efe6',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+
   return (
-    <html lang="fa" dir="rtl" className={`${vazirmatn.variable} ${lalezar.variable}`}>
+    <html lang="fa" dir="rtl">
       <body
         style={{
-          fontFamily: 'Peyda, var(--font-vazirmatn), Tahoma, sans-serif',
-          ['--font-display' as string]: 'var(--font-lalezar), Peyda, Tahoma, sans-serif',
+          fontFamily: 'Vazirmatn, Tahoma, sans-serif',
+          ['--font-display' as string]: 'Vazirmatn, Tahoma, sans-serif',
+          ['--font-body' as string]: 'Vazirmatn, Tahoma, sans-serif',
+          ['--font-mark' as string]: 'Vazirmatn, Tahoma, sans-serif',
         }}
       >
-        <div className="majara-grain" />
-        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+        <Script src="https://telegram.org/js/telegram-web-app.js?63" strategy="beforeInteractive" />
+        <Script id="majara-api-url" strategy="beforeInteractive">
+          {`window.__MAJARA_API_URL = ${JSON.stringify(apiUrl)};`}
+        </Script>
         <SentryInit />
         {children}
       </body>

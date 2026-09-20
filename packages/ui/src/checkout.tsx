@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { BrandIconTile } from './brand-icon';
 import { DEFAULT_PROVINCE, IRAN_PROVINCES } from './iran-regions';
 
 export type CheckoutLine = {
@@ -24,15 +25,25 @@ export type CheckoutAddress = {
 
 export type CheckoutSubmitPayload = CheckoutAddress & {
   provider: 'ZIBAL' | 'NOWPAYMENTS';
+  deliveryMethod: 'POST' | 'COURIER_TEHRAN';
+};
+
+export type CheckoutDeliveryOption = {
+  id: 'POST' | 'COURIER_TEHRAN';
+  title: string;
+  description: string;
+  shippingRial: number;
 };
 
 export interface CheckoutScreenProps {
   items: CheckoutLine[];
   shippingRial: number;
+  deliveryOptions?: CheckoutDeliveryOption[];
   initialAddress?: Partial<CheckoutAddress>;
   busy?: boolean;
   error?: string | null;
   cryptoEnabled?: boolean;
+  onProvinceChange?: (province: string) => void;
   onSubmit: (payload: CheckoutSubmitPayload) => void;
   onEditOrder: () => void;
 }
@@ -61,11 +72,20 @@ const EMPTY_ADDRESS: CheckoutAddress = {
   notes: '',
 };
 
+const DEFAULT_DELIVERY_OPTIONS: CheckoutDeliveryOption[] = [
+  {
+    id: 'POST',
+    title: 'ارسال پستی',
+    description: 'ارسال به همه شهرهای ایران',
+    shippingRial: 0,
+  },
+];
+
 const fieldClass =
-  'h-11 w-full rounded-none border border-[#7a7a7a] bg-white px-3 text-sm outline-none focus:border-black';
+  'majara-field h-11 w-full px-3 text-sm outline-none focus:border-[var(--majara-red)]';
 
 function formatToman(amount: number) {
-  return `${new Intl.NumberFormat('fa-IR').format(amount)} تومان`;
+  return `${new Intl.NumberFormat('fa-IR-u-nu-latn').format(amount)} تومان`;
 }
 
 function toEnglishDigits(input: string) {
@@ -83,15 +103,18 @@ export function issueLineTitle(title: string, number?: number) {
 export function CheckoutScreen({
   items,
   shippingRial,
+  deliveryOptions,
   initialAddress,
   busy = false,
   error,
   cryptoEnabled = false,
+  onProvinceChange,
   onSubmit,
   onEditOrder,
 }: CheckoutScreenProps): ReactNode {
   const [form, setForm] = useState<CheckoutAddress>(EMPTY_ADDRESS);
   const [provider, setProvider] = useState<'ZIBAL' | 'NOWPAYMENTS'>('ZIBAL');
+  const [deliveryMethod, setDeliveryMethod] = useState<'POST' | 'COURIER_TEHRAN'>('POST');
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof CheckoutAddress, string>>>({});
 
   useEffect(() => {
@@ -111,13 +134,26 @@ export function CheckoutScreen({
     if (!cryptoEnabled) setProvider('ZIBAL');
   }, [cryptoEnabled]);
 
+  const availableDeliveryOptions = deliveryOptions?.length
+    ? deliveryOptions
+    : DEFAULT_DELIVERY_OPTIONS.map((option) => ({ ...option, shippingRial }));
+  const selectedDelivery =
+    availableDeliveryOptions.find((option) => option.id === deliveryMethod) ?? availableDeliveryOptions[0];
+  const currentShippingRial = selectedDelivery?.shippingRial ?? shippingRial;
+
+  useEffect(() => {
+    if (!availableDeliveryOptions.some((option) => option.id === deliveryMethod)) {
+      setDeliveryMethod(availableDeliveryOptions[0]?.id ?? 'POST');
+    }
+  }, [availableDeliveryOptions, deliveryMethod]);
+
   const cities = useMemo(
     () => IRAN_PROVINCES.find((item) => item.name === form.province)?.cities ?? [],
     [form.province],
   );
 
   const subtotal = items.reduce((sum, item) => sum + item.priceRial * item.qty, 0);
-  const total = subtotal + shippingRial;
+  const total = subtotal + currentShippingRial;
 
   function setField<K extends keyof CheckoutAddress>(key: K, value: CheckoutAddress[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -151,17 +187,19 @@ export function CheckoutScreen({
       postalCode: toEnglishDigits(form.postalCode).replace(/\s/g, ''),
       phone: toEnglishDigits(form.phone).replace(/[^\d]/g, ''),
       provider,
+      deliveryMethod: selectedDelivery?.id ?? 'POST',
     });
   }
 
   return (
     <form className="space-y-8 pb-4" onSubmit={handleSubmit}>
-      <p className="border border-[#ddd4c8] bg-[#f7f4ef] px-3 py-2.5 text-[12px] leading-6 text-[var(--majara-muted)]">
+      <p className="majara-panel border-[var(--majara-gold)] px-3 py-2.5 text-[12px] leading-6 text-[var(--majara-muted)]">
         اگر نیاز خاصی برای ثبت سفارش دارید اینجا برای ما مطرح کنید
       </p>
 
       <section>
-        <h1 className="mb-4 border-b border-black/15 pb-2 text-[1.35rem] font-bold">
+        <h1 className="mb-4 flex items-center gap-2.5 border-b border-black/15 pb-2 text-[1.35rem] font-bold">
+          <BrandIconTile name="iran" size={26} />
           صورت حساب و حمل و نقل
         </h1>
         <div className="space-y-4">
@@ -189,6 +227,7 @@ export function CheckoutScreen({
                 onChange={(event) => {
                   setForm((prev) => ({ ...prev, province: event.target.value, city: '' }));
                   setFieldErrors((prev) => ({ ...prev, province: undefined, city: undefined }));
+                  onProvinceChange?.(event.target.value);
                 }}
               >
                 {IRAN_PROVINCES.map((province) => (
@@ -238,7 +277,16 @@ export function CheckoutScreen({
               autoComplete="postal-code"
             />
           </Field>
-          <Field label="تلفن" required error={fieldErrors.phone}>
+          <Field
+            label={
+              <span className="inline-flex items-center gap-2">
+                <BrandIconTile name="call" size={24} />
+                تلفن
+              </span>
+            }
+            required
+            error={fieldErrors.phone}
+          >
             <input
               className={fieldClass}
               value={form.phone}
@@ -252,10 +300,39 @@ export function CheckoutScreen({
       </section>
 
       <section>
+        <h2 className="mb-4 border-t border-black/15 pt-5 text-[1.15rem] font-bold">نحوه ارسال</h2>
+        <div className="space-y-2">
+          {availableDeliveryOptions.map((option) => (
+            <label
+              key={option.id}
+              className={`majara-field flex cursor-pointer items-center justify-between gap-3 px-4 py-3 ${
+                deliveryMethod === option.id ? 'border-[var(--majara-red)]' : 'border-[var(--majara-silver)]'
+              }`}
+            >
+              <span className="flex items-start gap-3">
+                <input
+                  type="radio"
+                  className="mt-1 accent-[var(--majara-red)]"
+                  name="delivery-method"
+                  checked={deliveryMethod === option.id}
+                  onChange={() => setDeliveryMethod(option.id)}
+                />
+                <span>
+                  <span className="block text-sm font-bold">{option.title}</span>
+                  <span className="mt-1 block text-xs text-[var(--majara-muted)]">{option.description}</span>
+                </span>
+              </span>
+              <strong className="shrink-0 text-[13px]">{formatToman(option.shippingRial)}</strong>
+            </label>
+          ))}
+        </div>
+      </section>
+
+      <section>
         <h2 className="mb-4 border-t border-black/15 pt-5 text-[1.15rem] font-bold">توضیحات تکمیلی</h2>
         <Field label="یادداشت های سفارش (اختیاری)">
           <textarea
-            className="min-h-24 w-full rounded-none border border-[#7a7a7a] bg-white px-3 py-2 text-sm outline-none focus:border-black"
+            className="majara-field min-h-24 w-full px-3 py-2 text-sm outline-none focus:border-[var(--majara-red)]"
             value={form.notes}
             placeholder="اگر نیاز خاصی برای ثبت سفارش دارید اینجا برای ما مطرح کنید"
             onChange={(event) => setField('notes', event.target.value)}
@@ -263,18 +340,18 @@ export function CheckoutScreen({
         </Field>
       </section>
 
-      <section className="border border-[#cfcfcf] bg-white">
-        <h2 className="border-b border-[#cfcfcf] px-4 py-3 text-[1.15rem] font-bold">سفارش شما</h2>
+      <section className="majara-panel">
+        <h2 className="border-b border-[var(--majara-silver)] px-4 py-3 text-[1.15rem] font-bold">سفارش شما</h2>
         <table className="w-full text-[13px]">
           <thead>
-            <tr className="border-b border-[#cfcfcf] text-[var(--majara-muted)]">
+            <tr className="border-b border-[var(--majara-silver)] text-[var(--majara-muted)]">
               <th className="px-4 py-2 text-right font-medium">محصول</th>
               <th className="px-4 py-2 text-left font-medium">جمع جزء</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id} className="border-b border-[#cfcfcf]">
+              <tr key={item.id} className="border-b border-[var(--majara-silver)]">
                 <td className="px-4 py-3 leading-6">
                   {issueLineTitle(item.title, item.number)}
                   <span className="mt-1 block text-[12px] text-[var(--majara-muted)]">
@@ -291,33 +368,33 @@ export function CheckoutScreen({
                 </td>
               </tr>
             ) : null}
-            <tr className="border-b border-[#cfcfcf]">
+            <tr className="border-b border-[var(--majara-silver)]">
               <th className="px-4 py-3 text-right font-medium">جمع جزء</th>
               <td className="px-4 py-3 text-left">{formatToman(subtotal)}</td>
             </tr>
-            <tr className="border-b border-[#cfcfcf]">
+            <tr className="border-b border-[var(--majara-silver)]">
               <th className="px-4 py-3 text-right font-medium">حمل و نقل</th>
               <td className="px-4 py-3 text-left leading-6">
-                بسته‌بندی و ارسال: {formatToman(shippingRial)}
+                {selectedDelivery?.title ?? 'بسته‌بندی و ارسال'}: {formatToman(currentShippingRial)}
               </td>
             </tr>
             <tr>
               <th className="px-4 py-3 text-right font-bold">مجموع</th>
-              <td className="px-4 py-3 text-left font-bold">{formatToman(total)}</td>
+              <td className="majara-price px-4 py-3 text-left">{formatToman(total)}</td>
             </tr>
           </tbody>
         </table>
       </section>
 
       <div className="space-y-3">
-        <p className="border border-[var(--majara-red)] bg-[#fdecee] px-3 py-2.5 text-[13px] font-bold leading-6 text-[var(--majara-red)]">
+        <p className="border border-[var(--majara-red)] px-3 py-2.5 text-[13px] font-bold leading-6 text-[var(--majara-red)]">
           برای پرداخت، فیلترشکن (VPN) را خاموش کنید
         </p>
         {cryptoEnabled ? (
           <>
             <label
-              className={`flex h-12 cursor-pointer items-center justify-between border px-4 ${
-                provider === 'ZIBAL' ? 'border-[#7a7a7a] bg-white' : 'border-[#d5d5d5] bg-white'
+              className={`majara-field flex h-12 cursor-pointer items-center justify-between px-4 ${
+                provider === 'ZIBAL' ? 'border-[var(--majara-charcoal)]' : 'border-[var(--majara-silver)]'
               }`}
             >
               <span className="flex items-center gap-2 text-[13px] font-bold">
@@ -333,8 +410,8 @@ export function CheckoutScreen({
               <BankPayIcon />
             </label>
             <label
-              className={`flex h-12 cursor-pointer items-center justify-between border px-4 ${
-                provider === 'NOWPAYMENTS' ? 'border-[#7a7a7a] bg-white' : 'border-[#d5d5d5] bg-white'
+              className={`majara-field flex h-12 cursor-pointer items-center justify-between px-4 ${
+                provider === 'NOWPAYMENTS' ? 'border-[var(--majara-charcoal)]' : 'border-[var(--majara-silver)]'
               }`}
             >
               <span className="flex items-center gap-2 text-[13px] font-bold">
@@ -350,7 +427,7 @@ export function CheckoutScreen({
             </label>
           </>
         ) : (
-          <div className="flex h-12 items-center justify-between border border-[#7a7a7a] bg-white px-4">
+          <div className="majara-field flex h-12 items-center justify-between px-4">
             <span className="text-[13px] font-bold">پرداخت بانکی</span>
             <BankPayIcon />
           </div>
@@ -358,14 +435,14 @@ export function CheckoutScreen({
         <button
           type="button"
           onClick={onEditOrder}
-          className="flex h-12 w-full items-center justify-center bg-[#4a4a4a] text-[14px] font-bold text-white"
+          className="flex h-12 w-full items-center justify-center rounded-[var(--radius)] bg-[var(--majara-charcoal)] text-[14px] font-bold text-white"
         >
           ویرایش سفارش
         </button>
         <button
           type="submit"
           disabled={busy || items.length === 0}
-          className="flex h-12 w-full items-center justify-center bg-[var(--majara-red)] text-[15px] font-bold text-white disabled:opacity-50"
+          className="flex h-12 w-full items-center justify-center rounded-[var(--radius)] bg-[var(--majara-red)] text-[15px] font-bold text-white disabled:opacity-50"
         >
           {busy ? 'در حال ثبت...' : 'ثبت سفارش'}
         </button>
@@ -381,7 +458,7 @@ function Field({
   error,
   children,
 }: {
-  label: string;
+  label: ReactNode;
   required?: boolean;
   error?: string;
   children: ReactNode;

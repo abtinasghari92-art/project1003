@@ -91,7 +91,7 @@ export function rialToUsd(amountRial: number, usdToIrrRate: number): number {
 }
 
 export function formatRial(amountRial: number): string {
-  return new Intl.NumberFormat('fa-IR').format(amountRial);
+  return new Intl.NumberFormat('fa-IR-u-nu-latn').format(amountRial);
 }
 
 /** Packaging and postage on the original majara.sooremehr.ir checkout. */

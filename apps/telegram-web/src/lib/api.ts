@@ -16,11 +16,22 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   headers.set('Content-Type', 'application/json');
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
-  const response = await fetch(`${API_URL}${path}`, { ...init, headers });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { ...init, headers });
+  } catch {
+    throw new Error('ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.');
+  }
   if (!response.ok) {
     const body = await response.json().catch(() => ({ message: response.statusText }));
     const raw = body.message;
     const message = Array.isArray(raw) ? raw.join('، ') : raw;
+    if (response.status === 401) {
+      throw new Error('نشست شما معتبر نیست. لطفاً Mini App را دوباره باز کنید.');
+    }
+    if (response.status === 403) {
+      throw new Error('اجازه انجام این عملیات را ندارید.');
+    }
     throw new Error(message ?? 'خطای سرور');
   }
   return response.json() as Promise<T>;
