@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+.turbo
+tools/pnpm-linuxstatic-x64
+**/.turbo
+**/tsconfig.tsbuildinfo
