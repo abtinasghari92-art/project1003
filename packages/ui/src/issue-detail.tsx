@@ -64,12 +64,12 @@ function RatingPrompt({
           <button
             key={option}
             type="button"
-            className={stars === option ? 'majara-rating-prompt__star--selected' : ''}
+            className={stars >= option ? 'majara-rating-prompt__star--selected' : ''}
             aria-label={`${formatFa(option)} ستاره`}
-            aria-pressed={stars === option}
+            aria-pressed={stars >= option}
             onClick={() => onChoose(option)}
           >
-            <Star size={37} weight={stars === option ? 'fill' : 'regular'} />
+            <Star size={37} weight={stars >= option ? 'fill' : 'regular'} />
             <span>{formatFa(option)}</span>
           </button>
         ))}
