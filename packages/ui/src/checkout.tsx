@@ -85,7 +85,7 @@ const fieldClass =
   'majara-field h-11 w-full px-3 text-sm outline-none focus:border-[var(--majara-red)]';
 
 function formatToman(amount: number) {
-  return `${new Intl.NumberFormat('fa-IR-u-nu-latn').format(amount)} تومان`;
+  return `${new Intl.NumberFormat('fa-IR').format(amount)} تومان`;
 }
 
 function toEnglishDigits(input: string) {

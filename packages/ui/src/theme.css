@@ -83,7 +83,9 @@ textarea {
 
 .majara-price {
   color: var(--majara-red);
+  font-family: Vazirmatn, Tahoma, sans-serif;
   font-weight: 700;
+  font-variant-numeric: normal;
 }
 
 .majara-field {

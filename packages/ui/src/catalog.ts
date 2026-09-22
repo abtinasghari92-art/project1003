@@ -202,7 +202,7 @@ export function mergeCatalogWithApi(
 }
 
 export function formatFa(amount: number) {
-  return new Intl.NumberFormat('fa-IR-u-nu-latn').format(amount);
+  return new Intl.NumberFormat('fa-IR').format(amount);
 }
 
 export function formatToman(amount: number) {
