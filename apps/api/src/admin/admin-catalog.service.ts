@@ -16,11 +16,25 @@ import type {
 export class AdminCatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
-  listMagazines() {
-    return this.prisma.magazine.findMany({
-      include: { issues: { orderBy: { number: 'desc' } } },
-      orderBy: { title: 'asc' },
-    });
+  async listMagazines() {
+    const [magazines, issueViewCounts] = await Promise.all([
+      this.prisma.magazine.findMany({
+        include: { issues: { orderBy: { number: 'desc' } } },
+        orderBy: { title: 'asc' },
+      }),
+      this.prisma.analyticsEvent.groupBy({
+        by: ['issueId'],
+        where: { name: 'issue_view', issueId: { not: null } },
+        orderBy: { issueId: 'asc' },
+        _count: { _all: true },
+      }),
+    ]);
+    const viewsByIssueId = new Map(issueViewCounts.map((item) => [item.issueId, item._count._all]));
+
+    return magazines.map((magazine) => ({
+      ...magazine,
+      viewCount: magazine.issues.reduce((total, issue) => total + (viewsByIssueId.get(issue.id) ?? 0), 0),
+    }));
   }
 
   createMagazine(dto: CreateMagazineDto) {

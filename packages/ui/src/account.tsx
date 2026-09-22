@@ -6,6 +6,7 @@ import {
   CaretLeft,
   CheckCircle,
   Headset,
+  Info,
   MapPin,
   Package,
   PencilSimple,
@@ -97,6 +98,7 @@ export function ProfileHome({ user, phoneVerification }: { user: PublicUser | nu
         <AccountRow href="/profile/addresses" icon={<MapPin size={23} weight="regular" />} title="آدرس‌های من" description="افزودن و مدیریت آدرس‌های ارسال" />
       </section>
       <section className="mt-6 border-t border-black/8">
+        <AccountRow href="/profile/about" icon={<Info size={23} weight="regular" />} title="دربارهٔ ما" description="آشنایی با فصل‌نامهٔ ماجرا" />
         <AccountRow href="/profile#notifications" icon={<Bell size={23} weight="regular" />} title="اعلان‌ها" description="مدیریت خبرهای خرید و انتشار شماره‌ها" />
         <AccountRow href="/profile#support" icon={<Headset size={23} weight="regular" />} title="پشتیبانی" description="پاسخ به سوال‌ها و دریافت راهنمایی" />
       </section>

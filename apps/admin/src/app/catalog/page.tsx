@@ -234,6 +234,7 @@ function Catalog() {
                 {magazine.title}{' '}
                 <span className="text-sm font-normal text-[var(--majara-muted)]">/{magazine.slug}</span>
               </h2>
+              <p className="mt-1 text-sm text-[var(--majara-muted)]">بازدیدها: {new Intl.NumberFormat('fa-IR').format(magazine.viewCount)}</p>
               {magazine.coverUrl ? (
                 <p className="text-xs text-[var(--majara-muted)]">{magazine.coverUrl}</p>
               ) : null}

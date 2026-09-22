@@ -73,6 +73,7 @@ export type MagazineRow = {
   title: string;
   description: string | null;
   coverUrl: string | null;
+  viewCount: number;
   issues: IssueRow[];
 };
 

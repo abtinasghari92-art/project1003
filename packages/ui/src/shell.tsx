@@ -21,9 +21,18 @@ const links: { href: string; label: string; icon: Icon }[] = [
   { href: '/profile', label: 'پروفایل', icon: User },
 ];
 
-function CartBadge({ count }: { count: number }) {
+function CartBadge({ count, placement }: { count: number; placement: 'header' | 'nav' }) {
   if (count <= 0) return null;
-  return <span className="majara-cart-badge">{formatFa(count)}</span>;
+  const label = count > 99 ? '۹۹+' : formatFa(count);
+
+  return (
+    <span
+      className={`majara-cart-badge majara-cart-badge--${placement}`}
+      aria-label={`${formatFa(count)} کالا در سبد خرید`}
+    >
+      {label}
+    </span>
+  );
 }
 
 export function AppShell({
@@ -72,7 +81,7 @@ export function AppShell({
           className="relative grid h-11 w-11 place-items-center rounded-full bg-white text-[var(--majara-charcoal)] shadow-[0_8px_22px_rgba(60,60,59,.08)]"
         >
           <ShoppingCartSimple size={20} weight="regular" />
-          <CartBadge count={cartCount} />
+          <CartBadge count={cartCount} placement="header" />
         </a>
       </header>
       <main className="flex-1 px-4 py-4 pb-24">{children}</main>
@@ -111,7 +120,7 @@ export function AppShell({
                 }}
               >
                 <Icon size={18} weight={active ? 'fill' : 'regular'} />
-                {link.href === '/cart' ? <CartBadge count={cartCount} /> : null}
+                {link.href === '/cart' ? <CartBadge count={cartCount} placement="nav" /> : null}
               </span>
               {link.label}
             </a>

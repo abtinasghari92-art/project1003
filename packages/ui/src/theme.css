@@ -178,6 +178,40 @@ textarea {
   box-shadow: 0 8px 22px rgba(60, 60, 59, 0.08);
 }
 
+.majara-cart-badge {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  place-items: center;
+  border: 2px solid var(--majara-sheet);
+  border-radius: 999px;
+  background: var(--majara-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 8px rgba(180, 28, 32, 0.25);
+}
+
+.majara-cart-badge--header {
+  top: -3px;
+  right: -3px;
+}
+
+.majara-cart-badge--nav {
+  top: -4px;
+  right: -7px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-width: 1.5px;
+  font-size: 9px;
+}
+
 .majara-hero-tilt {
   perspective: 640px;
 }
